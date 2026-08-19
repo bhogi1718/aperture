@@ -37,19 +37,19 @@ Each phase has an exit criterion — a concrete, checkable thing that must be tr
 ### Phase 0 — Setup ✅ done
 Repo scaffolded, git initialized, GitHub remote connected (`bhogi1718/aperture`), Kaggle dataset in `data/raw/`.
 
-### Phase 1 — Data layer ← current
+### Phase 1 — Data layer ✅ done
 - Explore the real dataset (columns, distributions, missing values) via the Data Dictionary
 - Build the Faker-based synthetic alt-data generator (utility payment streak, recharge regularity, gig trip volume/rating) joined onto each row, loosely correlated with `SeriousDlqin2yrs`
 - Output: one combined training CSV (structured + alt-data) in `data/processed/`
 - **Exit criteria:** a single clean dataframe/CSV ready for training, with a short data-quality sanity check (row counts, no leakage, correlation sanity)
 
-### Phase 2 — Scoring model (model-service)
+### Phase 2 — Scoring model (model-service) ✅ done
 - Train XGBoost/LightGBM on the combined dataset
 - Wrap it in FastAPI: `/score` (predict + SHAP values), `/counterfactual` (perturb one feature, re-predict)
 - Unit tests on scoring logic (deterministic inputs → expected tier)
 - **Exit criteria:** `curl localhost:8000/score` returns a probability, risk tier, and SHAP feature contributions for a sample applicant
 
-### Phase 3 — Backend core (Express + Postgres)
+### Phase 3 — Backend core (Express + Postgres) ← current
 - Docker Compose: Postgres + pgvector
 - DB migrations: `applications`, `audit_log`, `embeddings` tables
 - Guardrails module: strip protected-attribute language before any text reaches an LLM prompt
