@@ -45,3 +45,7 @@ nextlevelbuilder-ui-ux-pro-max-skill-Public-main/
 
 # Claude Code local state
 .claude/
+
+# Raw Stitch design export (reference input for Phase 6 -- not a deliverable;
+# real frontend code lives in frontend/)
+stitch_aperture_credit_underwriting_tool/
