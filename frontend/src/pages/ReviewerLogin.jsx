@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { Header } from '../components/Header';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { login } from '../api/client';
 
@@ -32,52 +31,55 @@ export function ReviewerLogin() {
   }
 
   return (
-    <>
-      <Header />
-      <main className="page-narrow" style={{ paddingTop: 'var(--space-3xl)', maxWidth: 420 }}>
-        <div className="card">
-          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Reviewer Portal</h1>
-          <p className="text-muted" style={{ marginTop: 0, marginBottom: 'var(--space-lg)', fontSize: 14 }}>
-            Secure access for authorized personnel.
-          </p>
+    <div className="login-scene">
+      <div className="login-scene-blob login-scene-blob-1" aria-hidden="true" />
+      <div className="login-scene-blob login-scene-blob-2" aria-hidden="true" />
+      <div className="login-scene-blob login-scene-blob-3" aria-hidden="true" />
 
-          {error && (
-            <div style={{ background: 'var(--color-reject-soft)', color: 'var(--color-reject)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-md)', fontSize: 14 }}>
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="field">
-              <label className="field-label" htmlFor="username">Username</label>
-              <input
-                id="username"
-                className="input"
-                type="text"
-                autoComplete="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div className="field">
-              <label className="field-label" htmlFor="password">Password</label>
-              <input
-                id="password"
-                className="input"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit" className="btn btn-primary btn-block" disabled={submitting} style={{ marginTop: 'var(--space-sm)' }}>
-              {submitting ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
+      <div className="login-card">
+        <div className="login-card-brand">
+          <span className="app-header-mark" aria-hidden="true">◍</span>
+          <span>Aperture</span>
         </div>
-      </main>
-    </>
+        <h1 className="login-card-title">Reviewer Portal</h1>
+        <p className="login-card-subtitle">Secure access for authorized personnel.</p>
+
+        {error && (
+          <div className="login-card-error">{error}</div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="field">
+            <label className="field-label login-card-label" htmlFor="username">Username</label>
+            <input
+              id="username"
+              className="input"
+              type="text"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="field-label login-card-label" htmlFor="password">Password</label>
+            <input
+              id="password"
+              className="input"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary btn-block" disabled={submitting} style={{ marginTop: 'var(--space-sm)' }}>
+            {submitting ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
+
+        <Link to="/" className="login-card-back">← Back to Aperture</Link>
+      </div>
+    </div>
   );
 }

@@ -28,9 +28,10 @@
   --color-accent: #c97a2c;
   --color-accent-soft: #fceedb;
 
-  /* Semantic: risk tiers */
-  --color-approve: #2f6e4f;
-  --color-approve-soft: #e1efe6;
+  /* Semantic: risk tiers -- Approve uses a teal-cyan tied to the brand
+     primary rather than a generic traffic-light green */
+  --color-approve: #2a8c8c;
+  --color-approve-soft: #dcf0f0;
   --color-review: #c97a2c;
   --color-review-soft: #fceedb;
   --color-reject: #a13d2e;
@@ -80,8 +81,8 @@
     --color-accent: #e3a35f;
     --color-accent-soft: #2e2113;
 
-    --color-approve: #6fbd93;
-    --color-approve-soft: #16291f;
+    --color-approve: #5fc4c4;
+    --color-approve-soft: #143333;
     --color-review: #e3a35f;
     --color-review-soft: #2e2113;
     --color-reject: #e08172;
@@ -110,8 +111,8 @@
   --color-accent: #e3a35f;
   --color-accent-soft: #2e2113;
 
-  --color-approve: #6fbd93;
-  --color-approve-soft: #16291f;
+  --color-approve: #5fc4c4;
+  --color-approve-soft: #143333;
   --color-review: #e3a35f;
   --color-review-soft: #2e2113;
   --color-reject: #e08172;

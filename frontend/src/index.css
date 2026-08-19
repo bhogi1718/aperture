@@ -311,6 +311,131 @@ textarea.input {
   transition: width 0.4s ease;
 }
 
+/* ---------- Reviewer login scene ---------- */
+/* Deliberately single-theme (doesn't follow light/dark tokens) -- an
+   atmospheric gate screen distinct from the rest of the app, always
+   rendered in deep teal regardless of the viewer's OS preference. */
+.login-scene {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-lg);
+  background: radial-gradient(circle at 20% 20%, #0f3d3e 0%, #002627 55%, #001516 100%);
+}
+
+.login-scene-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(2px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.login-scene-blob-1 {
+  width: 420px;
+  height: 420px;
+  top: -120px;
+  left: -100px;
+  background: radial-gradient(circle, #a3cfcf 0%, transparent 70%);
+}
+
+.login-scene-blob-2 {
+  width: 360px;
+  height: 360px;
+  bottom: -140px;
+  right: -80px;
+  background: radial-gradient(circle, #c97a2c 0%, transparent 70%);
+  opacity: 0.25;
+}
+
+.login-scene-blob-3 {
+  width: 260px;
+  height: 260px;
+  bottom: 10%;
+  left: 8%;
+  background: radial-gradient(circle, #2f6e4f 0%, transparent 70%);
+  opacity: 0.2;
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: 0 20px 60px rgba(0, 10, 10, 0.4);
+}
+
+.login-card-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: #eaf5f3;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: var(--space-lg);
+}
+
+.login-card-brand .app-header-mark {
+  background: rgba(255, 255, 255, 0.14);
+  color: #eaf5f3;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.login-card-title {
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.login-card-subtitle {
+  color: rgba(234, 245, 243, 0.7);
+  font-size: 14px;
+  margin: 0 0 var(--space-lg);
+}
+
+.login-card-label {
+  color: rgba(234, 245, 243, 0.85);
+}
+
+.login-card-error {
+  background: rgba(224, 129, 114, 0.18);
+  border: 1px solid rgba(224, 129, 114, 0.4);
+  color: #f3c9c0;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  font-size: 14px;
+}
+
+.login-card .input {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.login-card-back {
+  display: block;
+  text-align: center;
+  margin-top: var(--space-lg);
+  color: rgba(234, 245, 243, 0.6);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.login-card-back:hover {
+  color: #eaf5f3;
+  text-decoration: underline;
+}
+
 /* ---------- Utility ---------- */
 .label-caps {
   font-size: 12px;
