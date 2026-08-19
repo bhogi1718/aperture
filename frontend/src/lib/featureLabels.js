@@ -15,8 +15,8 @@ export const FEATURE_LABELS = {
   dependents_was_missing: 'Dependents data availability',
   utility_payment_streak: 'Utility payment streak',
   recharge_regularity_score: 'Mobile recharge regularity',
-  gig_trip_volume: 'Gig-platform trip volume',
-  gig_rating: 'Gig-platform rating',
+  gig_trip_volume: 'Income activity volume',
+  gig_rating: 'Platform or client rating',
 };
 
 export function featureLabel(key) {

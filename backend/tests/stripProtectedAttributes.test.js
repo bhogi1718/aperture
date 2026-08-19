@@ -11,7 +11,7 @@ test("returns empty result for null/undefined input", () => {
 });
 
 test("leaves neutral financial text untouched", () => {
-  const text = "Gig worker on Ola, 45 trips in the last 30 days, rating 4.6.";
+  const text = "Small business owner, 45 transactions recorded in the last 30 days, rating 4.6.";
   const result = stripProtectedAttributes(text);
   assert.equal(result.text, text);
   assert.equal(result.redactionCount, 0);

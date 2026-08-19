@@ -4,7 +4,7 @@ import { Header } from '../components/Header';
 const HIGHLIGHTS = [
   {
     title: 'Alternative data',
-    body: 'Go beyond credit scores by looking at utility payments, mobile recharge, and gig-platform activity.',
+    body: 'Go beyond credit scores by looking at utility payments, mobile recharge, and income activity.',
   },
   {
     title: 'Explainable score',

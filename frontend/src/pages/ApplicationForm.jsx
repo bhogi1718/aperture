@@ -244,7 +244,8 @@ export function ApplicationForm() {
           <section className="card" style={{ marginBottom: 'var(--space-lg)', background: 'var(--color-primary)', color: 'var(--color-on-primary)' }}>
             <h2 className="label-caps" style={{ marginBottom: 4, color: 'var(--color-on-primary)', opacity: 0.7 }}>Alternative data</h2>
             <p style={{ opacity: 0.85, fontSize: 14, marginTop: 0, marginBottom: 'var(--space-lg)' }}>
-              We look beyond traditional scores. These factors help us say "yes" to more people.
+              We look beyond traditional scores. These factors help us say "yes" to more people —
+              whether you're a freelancer, small business owner, student, or new to earning.
             </p>
 
             <div className="field">
@@ -282,21 +283,27 @@ export function ApplicationForm() {
             </div>
 
             <div className="field">
-              <label className="field-label" htmlFor="trips" style={{ color: 'inherit' }}>Gig-economy trips (last 30 days)</label>
+              <label className="field-label" htmlFor="trips" style={{ color: 'inherit' }}>
+                Income-generating activity (last 30 days)
+              </label>
               <input
                 id="trips"
                 className="input"
                 type="number"
                 min={0}
-                placeholder="e.g. 45"
+                placeholder="e.g. trips completed, jobs done, orders fulfilled"
                 value={form.gigTrips}
                 onChange={set('gigTrips')}
               />
+              <span className="field-hint" style={{ color: 'inherit', opacity: 0.7 }}>
+                Any countable measure of activity — platform trips, freelance jobs, shop
+                transactions, tuition sessions, whatever applies to your work.
+              </span>
             </div>
 
             <div className="field">
               <label className="field-label" htmlFor="rating" style={{ color: 'inherit' }}>
-                Gig-platform rating <span className="mono">{Number(form.gigRating).toFixed(1)}</span>
+                Platform or client rating, if applicable <span className="mono">{Number(form.gigRating).toFixed(1)}</span>
               </label>
               <input
                 id="rating"
@@ -308,17 +315,21 @@ export function ApplicationForm() {
                 value={form.gigRating}
                 onChange={set('gigRating')}
               />
+              <span className="field-hint" style={{ color: 'inherit', opacity: 0.7 }}>
+                From a gig app, marketplace, or client feedback. Leave at the default if this
+                doesn't apply to you.
+              </span>
             </div>
           </section>
 
           <section className="card" style={{ marginBottom: 'var(--space-lg)' }}>
             <label className="label-caps" htmlFor="narrative" style={{ display: 'block', marginBottom: 'var(--space-md)' }}>
-              Tell us about your work (optional)
+              Tell us about your income (optional)
             </label>
             <textarea
               id="narrative"
               className="input"
-              placeholder="e.g. I drive for a rideshare app mostly on weekends, and I also do some freelance graphic design."
+              placeholder="e.g. I run a small tailoring shop, or I do freelance design work, or I'm a student with a part-time tutoring income."
               value={form.narrative}
               onChange={set('narrative')}
               maxLength={2000}

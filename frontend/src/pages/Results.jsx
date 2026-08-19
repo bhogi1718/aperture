@@ -14,7 +14,7 @@ const TIER_COPY = {
 const COUNTERFACTUAL_FEATURES = [
   { key: 'utility_payment_streak', label: 'Utility Payment Streak', min: 0, max: 36, step: 1 },
   { key: 'recharge_regularity_score', label: 'Mobile Recharge Regularity', min: 0, max: 100, step: 1 },
-  { key: 'gig_rating', label: 'Gig-Platform Rating', min: 1, max: 5, step: 0.1 },
+  { key: 'gig_rating', label: 'Platform or Client Rating', min: 1, max: 5, step: 0.1 },
 ];
 
 function CounterfactualExplorer({ applicant }) {

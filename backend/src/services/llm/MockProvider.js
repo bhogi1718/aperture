@@ -15,8 +15,8 @@ const FEATURE_LABELS = {
   dependents_was_missing: "dependents data availability",
   utility_payment_streak: "utility payment streak",
   recharge_regularity_score: "mobile recharge regularity",
-  gig_trip_volume: "gig-platform trip volume",
-  gig_rating: "gig-platform rating",
+  gig_trip_volume: "income activity volume",
+  gig_rating: "platform or client rating",
 };
 
 /**

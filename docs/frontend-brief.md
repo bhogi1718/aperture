@@ -39,22 +39,28 @@ wizard — keep friction low for the demo).
   (helper text: "It's okay if this is zero — most applicants have none")
 
 **Section C — Alternative data** (visually distinct section, this is
-Aperture's differentiator — give it its own card/background treatment)
+Aperture's differentiator — give it its own card/background treatment).
+Phrased to generalize across any NTC/thin-file applicant — gig worker,
+small business owner, freelancer, student — rather than assuming one
+occupation type.
 - Utility payment streak — "How many consecutive months have you paid
   utility bills (electricity, water, etc.) on time?" (0–36, slider)
 - Mobile recharge regularity — "How consistent is your mobile recharge
   timing?" (0–100 slider, labeled "Irregular" → "Very regular")
-- Gig platform trips — "How many trips/jobs have you completed in the last
-  30 days?" (number input, 0+)
-- Gig platform rating — "Your average rating on the platform" (1.0–5.0,
-  star selector or slider)
+- Income-generating activity — "Any countable measure of activity in the
+  last 30 days — platform trips, freelance jobs, shop transactions,
+  tutoring sessions, whatever applies to your work." (number input, 0+)
+- Platform or client rating, if applicable — "From a gig app, marketplace,
+  or client feedback. Leave at the default if this doesn't apply to you."
+  (1.0–5.0, star selector or slider)
 
-**Section D — Tell us about your work** (optional free text)
-- Textarea, placeholder: "e.g. I drive for Ola on weekdays and do food
-  delivery on weekends. I've been saving consistently for the last year."
-  (helper text: "This helps us compare you to similar applicants. Please
-  don't include personal details like religion, marital status, or caste —
-  we don't use these in our decision and will remove them automatically.")
+**Section D — Tell us about your income** (optional free text)
+- Textarea, placeholder: "e.g. I run a small tailoring shop, or I do
+  freelance design work, or I'm a student with a part-time tutoring
+  income." (helper text: "This helps us compare you to similar applicants.
+  Please don't include personal details like religion, marital status, or
+  caste — we don't use these in our decision and will remove them
+  automatically.")
 
 - Primary button: "Get my decision" → Screen 3
 - Form validation: inline errors, age/income/etc. bounds enforced client-side
@@ -127,10 +133,12 @@ decision banner, explanation, feature chart, cohort — plus:)
 
 ## Design direction notes for Stitch
 - Product: **Aperture** — a credit intelligence / fintech underwriting tool
-- Persona: gig-economy workers and small vendors in India (UPI/mobile-first,
-  may be a first-time credit applicant) — the applicant flow should feel
-  approachable, mobile-friendly, non-intimidating, NOT like a bank loan
-  form. Plain language, generous spacing, reassuring tone.
+- Persona: New-to-Credit (NTC) and thin-file applicants in India — people
+  with UPI/mobile-first transaction history but no formal bureau file.
+  This spans gig workers, small business owners, freelancers, students, and
+  first-time earners; no single archetype should be assumed. The applicant
+  flow should feel approachable, mobile-friendly, non-intimidating, NOT
+  like a bank loan form. Plain language, generous spacing, reassuring tone.
 - The reviewer dashboard can feel more like a standard SaaS admin/data tool
   — denser, table-driven, utilitarian.
 - Color-code risk tiers consistently everywhere they appear: Approve =

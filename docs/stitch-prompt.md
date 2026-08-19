@@ -1,5 +1,12 @@
 # Stitch prompt — paste this in
 
+> Historical record: this is the exact prompt originally sent to Stitch to
+> generate the current screens. Its "gig platform" field names/copy were
+> later broadened to general NTC/thin-file language in the actual app —
+> see `docs/frontend-brief.md` for the current field descriptions. Kept
+> here unedited since it's a record of what was actually sent, not a
+> living spec.
+
 Design a web app called **Aperture**, a fintech credit-underwriting tool for
 a hackathon. It has 5 screens across two flows. Clean, modern, credible
 fintech aesthetic (Stripe/Mercury-style) — not flashy or playful.
