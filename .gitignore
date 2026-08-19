@@ -38,3 +38,9 @@ Thumbs.db
 
 # Docker
 postgres-data/
+
+# Third-party tooling dropped into the repo root, not part of Aperture
+nextlevelbuilder-ui-ux-pro-max-skill-Public-main/
+
+# Claude Code local state
+.claude/

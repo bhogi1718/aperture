@@ -30,32 +30,65 @@ React → Express /api/applications (GET, JWT-gated) → underwriter dashboard l
 
 Key principle preserved throughout: **the LLM never produces the score.** XGBoost does. Bedrock only explains and embeds.
 
-## Build order (2 days)
+## Phased workflow
 
-### Day 1 — data + scoring core (the part that's actually judged)
-1. Download Kaggle "Give Me Some Credit" CSV → `data/raw/cs-training.csv`
-2. `model-service/training/` — Faker script to synthesize alt-data columns (utility payment streak, recharge regularity, gig trip volume/rating), loosely correlated with target
-3. `model-service/training/train.py` — train XGBoost/LightGBM on structured + alt features, save model artifact + feature list
-4. `model-service/app/` — FastAPI `/score` (predict + SHAP) and `/counterfactual` (perturb one feature, re-predict)
-5. `model-service/tests/` — unit tests on scoring logic (deterministic inputs → expected tier boundaries)
-6. Docker Compose: Postgres + pgvector, `backend/src/db/migrations` — applications table, audit_log table, embeddings table
-7. `backend/src/services/` — LLMProvider interface, MockProvider (default), BedrockProvider (real SDK calls, env-gated)
-8. `backend/src/guardrails/` — protected-attribute stripping (regex/wordlist pass before any prompt hits Bedrock/Mock)
-9. Prompt template for SHAP → plain-English explanation
+Each phase has an exit criterion — a concrete, checkable thing that must be true before moving on.
 
-**End of Day 1 target:** `curl POST /api/applications` returns a real score, real SHAP-derived explanation (mocked LLM text is fine), and writes an audit row. This is the core deliverable — everything else is presentation on top of it.
+### Phase 0 — Setup ✅ done
+Repo scaffolded, git initialized, GitHub remote connected (`bhogi1718/aperture`), Kaggle dataset in `data/raw/`.
 
-### Day 2 — API surface, frontend, auth, polish
-10. `backend/src/routes/` — applications (create/list/get), auth (login)
-11. Auth: bcrypt-hashed reviewer credentials in `.env`, JWT middleware on dashboard routes
-12. pgvector cohort comparison — embed narrative, `ORDER BY embedding <-> $1 LIMIT 5`
-13. `frontend/` — applicant form → results page (score, explanation, feature chart, cohort, counterfactual)
-14. `frontend/` — reviewer login → dashboard (list + detail, reusing results component)
-15. Counterfactual UI hookup (stretch — cut first if behind schedule)
-16. README (setup/run instructions), architecture diagram (docs/diagrams), backfill unit tests, final commit hygiene
-17. PPT/PDF deck + submission folder named `SE23UCSE240.*`
+### Phase 1 — Data layer ← current
+- Explore the real dataset (columns, distributions, missing values) via the Data Dictionary
+- Build the Faker-based synthetic alt-data generator (utility payment streak, recharge regularity, gig trip volume/rating) joined onto each row, loosely correlated with `SeriousDlqin2yrs`
+- Output: one combined training CSV (structured + alt-data) in `data/processed/`
+- **Exit criteria:** a single clean dataframe/CSV ready for training, with a short data-quality sanity check (row counts, no leakage, correlation sanity)
 
-**Cut order if time runs short:** counterfactual UI → dashboard filters/search → live Bedrock wiring (mock stays default) → polish/animations. Never cut: guardrails, audit logging, tests, README.
+### Phase 2 — Scoring model (model-service)
+- Train XGBoost/LightGBM on the combined dataset
+- Wrap it in FastAPI: `/score` (predict + SHAP values), `/counterfactual` (perturb one feature, re-predict)
+- Unit tests on scoring logic (deterministic inputs → expected tier)
+- **Exit criteria:** `curl localhost:8000/score` returns a probability, risk tier, and SHAP feature contributions for a sample applicant
+
+### Phase 3 — Backend core (Express + Postgres)
+- Docker Compose: Postgres + pgvector
+- DB migrations: `applications`, `audit_log`, `embeddings` tables
+- Guardrails module: strip protected-attribute language before any text reaches an LLM prompt
+- `LLMProvider` interface + `MockProvider` (default) + `BedrockProvider` (real, env-gated)
+- Explanation prompt template: SHAP values → plain-English text
+- Wire together: `POST /api/applications` → guardrails → model-service → LLM explanation → audit log insert
+- **Exit criteria:** one end-to-end `curl POST /api/applications` returns score + explanation + writes an audit row. This is the core deliverable — everything after this is presentation on top of a working engine.
+
+### Phase 4 — Cohort comparison (pgvector)
+- Embed applicant transaction narrative (via provider)
+- Similarity search against past applicants in Postgres
+- Wire cohort results into the application response
+- **Exit criteria:** response includes N similar past applicants with their outcomes
+
+### Phase 5 — Auth + API surface
+- Reviewer login (bcrypt + JWT), auth middleware on dashboard routes
+- Full route set: create/list/get applications, login
+- **Exit criteria:** protected routes reject requests without a valid JWT; login issues one
+
+### Phase 6 — Frontend
+- Applicant form → results page (score, explanation, feature chart, cohort, counterfactual if ready)
+- Reviewer login → dashboard (list + detail view, reusing the results component)
+- **Exit criteria:** full click-through demo works in a browser, no manual API calls needed
+
+### Phase 7 — Stretch: counterfactual UI
+- Hook up `/counterfactual` to a UI control ("what if X improved by 15%?")
+- First thing cut if behind schedule
+
+### Phase 8 — Wrap-up & submission
+- README (setup/run instructions)
+- Architecture diagram
+- Backfill any missing unit tests
+- Final commit hygiene
+- PPT/PDF deck: approach, key insights, findings, proposed solution
+- Package into `submission/` named `SE23UCSE240.*`
+
+**Cut order if time runs short:** Phase 7 → dashboard filters/search polish → live Bedrock wiring (mock stays default, fine to demo with) → visual polish. **Never cut:** guardrails, audit logging, tests, README.
+
+**Rough day mapping:** Phases 1-3 → Day 1 (data + scoring core is what's actually judged). Phases 4-8 → Day 2 (API surface, frontend, auth, polish, submission).
 
 ## Services
 
