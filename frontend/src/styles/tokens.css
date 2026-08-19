@@ -1,36 +1,40 @@
 /*
-  Design tokens adapted from the Stitch export (stitch_aperture_credit_underwriting_tool/aperture/DESIGN.md).
-  "Institutional Minimalism" -- Stripe-school clarity, restrained palette, 8px radius standard.
+  Design tokens adapted from the Stitch export
+  (stitch_aperture_credit_underwriting_tool/sage_steel/DESIGN.md).
+  "Sage & Steel" -- deep teal-charcoal primary, warm amber accent, sage-tinted
+  neutrals in place of stark white/grey. The amber accent doubles as the
+  Manual Review tier color, since that state is a designed-for outcome of
+  this product, not an exceptional/error case.
 */
 
 :root {
   /* Surfaces */
-  --color-background: #fcf8fa;
+  --color-background: #f3fbfa;
   --color-surface: #ffffff;
-  --color-surface-container-low: #f6f3f5;
-  --color-surface-container: #f0edef;
-  --color-surface-container-high: #eae7e9;
-  --color-surface-container-highest: #e4e2e4;
+  --color-surface-container-low: #edf5f5;
+  --color-surface-container: #e6ede9;
+  --color-surface-container-high: #dae3de;
+  --color-surface-container-highest: #dce4e4;
 
   /* Text */
-  --color-on-surface: #1b1b1d;
-  --color-on-surface-variant: #45464d;
-  --color-outline: #76777d;
-  --color-outline-variant: #c6c6cd;
+  --color-on-surface: #121a1a;
+  --color-on-surface-variant: #404848;
+  --color-outline: #c0c8c8;
+  --color-outline-variant: #c0c8c8;
 
   /* Brand */
-  --color-primary: #0f172a;
+  --color-primary: #002627;
   --color-on-primary: #ffffff;
-  --color-accent: #4f46e5;
-  --color-accent-soft: #eef2ff;
+  --color-accent: #c97a2c;
+  --color-accent-soft: #fceedb;
 
   /* Semantic: risk tiers */
-  --color-approve: #10b981;
-  --color-approve-soft: #d1fae5;
-  --color-review: #d97706;
-  --color-review-soft: #fef3c7;
-  --color-reject: #ba1a1a;
-  --color-reject-soft: #ffdad6;
+  --color-approve: #2f6e4f;
+  --color-approve-soft: #e1efe6;
+  --color-review: #c97a2c;
+  --color-review-soft: #fceedb;
+  --color-reject: #a13d2e;
+  --color-reject-soft: #f6e2dd;
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
@@ -52,36 +56,36 @@
   --space-2xl: 48px;
   --space-3xl: 64px;
 
-  /* Shadows -- tinted navy at low opacity, not muddy grey */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+  /* Shadows -- tinted deep teal at low opacity, not muddy grey */
+  --shadow-sm: 0 1px 2px rgba(0, 38, 39, 0.04), 0 1px 3px rgba(0, 38, 39, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 38, 39, 0.06), 0 2px 4px rgba(0, 38, 39, 0.04);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-background: #14151a;
-    --color-surface: #1c1e24;
-    --color-surface-container-low: #21232a;
-    --color-surface-container: #262932;
-    --color-surface-container-high: #2c2f3a;
-    --color-surface-container-highest: #333644;
+    --color-background: #0a1414;
+    --color-surface: #121e1e;
+    --color-surface-container-low: #162323;
+    --color-surface-container: #1c2b2a;
+    --color-surface-container-high: #233533;
+    --color-surface-container-highest: #2a3d3b;
 
-    --color-on-surface: #e9e9ec;
-    --color-on-surface-variant: #b3b4bc;
-    --color-outline: #6c6e78;
-    --color-outline-variant: #3a3c46;
+    --color-on-surface: #e8f2f0;
+    --color-on-surface-variant: #a8bcb9;
+    --color-outline: #3d504d;
+    --color-outline-variant: #2a3d3b;
 
-    --color-primary: #e9e9ec;
-    --color-on-primary: #14151a;
-    --color-accent: #8b85f0;
-    --color-accent-soft: #262441;
+    --color-primary: #a3cfcf;
+    --color-on-primary: #002627;
+    --color-accent: #e3a35f;
+    --color-accent-soft: #2e2113;
 
-    --color-approve: #4fd8a8;
-    --color-approve-soft: #163828;
-    --color-review: #f0b04f;
-    --color-review-soft: #3a2c12;
-    --color-reject: #ff8886;
-    --color-reject-soft: #3a1616;
+    --color-approve: #6fbd93;
+    --color-approve-soft: #16291f;
+    --color-review: #e3a35f;
+    --color-review-soft: #2e2113;
+    --color-reject: #e08172;
+    --color-reject-soft: #331a15;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -89,29 +93,29 @@
 }
 
 :root[data-theme='dark'] {
-  --color-background: #14151a;
-  --color-surface: #1c1e24;
-  --color-surface-container-low: #21232a;
-  --color-surface-container: #262932;
-  --color-surface-container-high: #2c2f3a;
-  --color-surface-container-highest: #333644;
+  --color-background: #0a1414;
+  --color-surface: #121e1e;
+  --color-surface-container-low: #162323;
+  --color-surface-container: #1c2b2a;
+  --color-surface-container-high: #233533;
+  --color-surface-container-highest: #2a3d3b;
 
-  --color-on-surface: #e9e9ec;
-  --color-on-surface-variant: #b3b4bc;
-  --color-outline: #6c6e78;
-  --color-outline-variant: #3a3c46;
+  --color-on-surface: #e8f2f0;
+  --color-on-surface-variant: #a8bcb9;
+  --color-outline: #3d504d;
+  --color-outline-variant: #2a3d3b;
 
-  --color-primary: #e9e9ec;
-  --color-on-primary: #14151a;
-  --color-accent: #8b85f0;
-  --color-accent-soft: #262441;
+  --color-primary: #a3cfcf;
+  --color-on-primary: #002627;
+  --color-accent: #e3a35f;
+  --color-accent-soft: #2e2113;
 
-  --color-approve: #4fd8a8;
-  --color-approve-soft: #163828;
-  --color-review: #f0b04f;
-  --color-review-soft: #3a2c12;
-  --color-reject: #ff8886;
-  --color-reject-soft: #3a1616;
+  --color-approve: #6fbd93;
+  --color-approve-soft: #16291f;
+  --color-review: #e3a35f;
+  --color-review-soft: #2e2113;
+  --color-reject: #e08172;
+  --color-reject-soft: #331a15;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
