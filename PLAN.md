@@ -71,16 +71,17 @@ Repo scaffolded, git initialized, GitHub remote connected (`bhogi1718/aperture`)
 - **Exit criteria:** protected routes reject requests without a valid JWT; login issues one
 - Built alongside Phase 3 — the dashboard routes needed auth to be complete end-to-end
 
-### Phase 6 — Frontend ← current
-- Applicant form → results page (score, explanation, feature chart, cohort, counterfactual if ready)
+### Phase 6 — Frontend ✅ done
+- Applicant form → results page (score, explanation, feature chart, cohort, counterfactual)
 - Reviewer login → dashboard (list + detail view, reusing the results component)
 - **Exit criteria:** full click-through demo works in a browser, no manual API calls needed
+- Verified with a real headless-browser run against the live backend + model-service (screenshots, zero console errors) — not just visual inspection
 
-### Phase 7 — Stretch: counterfactual UI
+### Phase 7 — Stretch: counterfactual UI ✅ done
 - Hook up `/counterfactual` to a UI control ("what if X improved by 15%?")
-- First thing cut if behind schedule
+- Built alongside Phase 6 — it lives on the Results page, so it went in with the rest of that screen rather than as a separate pass
 
-### Phase 8 — Wrap-up & submission
+### Phase 8 — Wrap-up & submission ← current
 - README (setup/run instructions)
 - Architecture diagram
 - Backfill any missing unit tests
