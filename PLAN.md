@@ -49,7 +49,7 @@ Repo scaffolded, git initialized, GitHub remote connected (`bhogi1718/aperture`)
 - Unit tests on scoring logic (deterministic inputs → expected tier)
 - **Exit criteria:** `curl localhost:8000/score` returns a probability, risk tier, and SHAP feature contributions for a sample applicant
 
-### Phase 3 — Backend core (Express + Postgres) ← current
+### Phase 3 — Backend core (Express + Postgres) ✅ done
 - Docker Compose: Postgres + pgvector
 - DB migrations: `applications`, `audit_log`, `embeddings` tables
 - Guardrails module: strip protected-attribute language before any text reaches an LLM prompt
@@ -58,18 +58,20 @@ Repo scaffolded, git initialized, GitHub remote connected (`bhogi1718/aperture`)
 - Wire together: `POST /api/applications` → guardrails → model-service → LLM explanation → audit log insert
 - **Exit criteria:** one end-to-end `curl POST /api/applications` returns score + explanation + writes an audit row. This is the core deliverable — everything after this is presentation on top of a working engine.
 
-### Phase 4 — Cohort comparison (pgvector)
+### Phase 4 — Cohort comparison (pgvector) ✅ done
 - Embed applicant transaction narrative (via provider)
 - Similarity search against past applicants in Postgres
 - Wire cohort results into the application response
 - **Exit criteria:** response includes N similar past applicants with their outcomes
+- Built alongside Phase 3 — the applications route needed it to be complete end-to-end
 
-### Phase 5 — Auth + API surface
-- Reviewer login (bcrypt + JWT), auth middleware on dashboard routes
+### Phase 5 — Auth + API surface ✅ done
+- Reviewer login (bcryptjs + JWT), auth middleware on dashboard routes
 - Full route set: create/list/get applications, login
 - **Exit criteria:** protected routes reject requests without a valid JWT; login issues one
+- Built alongside Phase 3 — the dashboard routes needed auth to be complete end-to-end
 
-### Phase 6 — Frontend
+### Phase 6 — Frontend ← current
 - Applicant form → results page (score, explanation, feature chart, cohort, counterfactual if ready)
 - Reviewer login → dashboard (list + detail view, reusing the results component)
 - **Exit criteria:** full click-through demo works in a browser, no manual API calls needed
