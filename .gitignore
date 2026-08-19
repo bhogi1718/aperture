@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Data (large / regeneratable, not committed)
+data/raw/
+data/processed/
+*.csv
+
+# Model artifacts
+model-service/artifacts/
+*.pkl
+*.joblib
+*.onnx
+
+# Build output
+frontend/build/
+frontend/dist/
+backend/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Docker
+postgres-data/
