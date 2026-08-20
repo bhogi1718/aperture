@@ -12,6 +12,25 @@ function formatDate(iso) {
   });
 }
 
+const FRAUD_FLAG_LABELS = {
+  implausible_activity_no_footprint: 'High claimed activity, no other financial footprint',
+  duplicate_narrative_recent: 'Duplicate narrative submitted recently',
+};
+
+function FraudFlags({ flags }) {
+  if (!flags || flags.length === 0) {
+    return <span className="text-muted" style={{ fontSize: 13 }}>—</span>;
+  }
+  return (
+    <span
+      className="badge badge-reject"
+      title={flags.map((f) => FRAUD_FLAG_LABELS[f] ?? f).join('; ')}
+    >
+      {flags.length} flag{flags.length > 1 ? 's' : ''}
+    </span>
+  );
+}
+
 export function ReviewerDashboard() {
   const { isAuthenticated, token, signOut } = useAuth();
   const [applications, setApplications] = useState(null);
@@ -66,6 +85,7 @@ export function ReviewerDashboard() {
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Submitted</th>
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Risk tier</th>
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Default probability</th>
+                  <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Flags</th>
                 </tr>
               </thead>
               <tbody>
@@ -82,6 +102,9 @@ export function ReviewerDashboard() {
                     </td>
                     <td style={{ padding: 'var(--space-md)' }} className="mono">
                       {(app.probability_of_default * 100).toFixed(1)}%
+                    </td>
+                    <td style={{ padding: 'var(--space-md)' }}>
+                      <FraudFlags flags={app.fraud_flags} />
                     </td>
                   </tr>
                 ))}

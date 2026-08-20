@@ -1,43 +1,62 @@
 /*
   Design tokens adapted from the Stitch export
-  (stitch_aperture_credit_underwriting_tool/sage_steel/DESIGN.md).
-  "Sage & Steel" -- deep teal-charcoal primary, warm amber accent, sage-tinted
-  neutrals in place of stark white/grey. The amber accent doubles as the
-  Manual Review tier color, since that state is a designed-for outcome of
-  this product, not an exceptional/error case.
+  (stitch_aperture_credit_underwriting_tool/glacier/DESIGN.md).
+  "Glacier" -- glassmorphism. Ice-blue primary, deep navy-black base,
+  translucent blurred glass surfaces instead of solid cards. Applied
+  app-wide (previously this atmospheric treatment was login-gate-only;
+  the whole app now commits to this single visual identity).
+
+  Risk tiers keep three distinct hues (ice-blue-teal / amber / coral-red)
+  rather than reusing the brand primary for Approve, so a reviewer can
+  still tell "this is an approved application" apart from "this is just
+  an interactive UI element" at a glance -- Glacier's own template reused
+  primary for both, which read as ambiguous.
+
+  Both light and dark variants exist: dark is Glacier's native identity
+  (frosted glass over deep navy), light is a genuine counterpart (frosted
+  glass over pale blue-grey) rather than a token-level inversion.
 */
 
 :root {
-  /* Surfaces */
-  --color-background: #f3fbfa;
+  /* Surfaces -- light glass: pale blue-grey base, near-white glass layers */
+  --color-background: #eef3f8;
   --color-surface: #ffffff;
-  --color-surface-container-low: #edf5f5;
-  --color-surface-container: #e6ede9;
-  --color-surface-container-high: #dae3de;
-  --color-surface-container-highest: #dce4e4;
+  --color-surface-container-low: #f5f8fb;
+  --color-surface-container: #e9eff5;
+  --color-surface-container-high: #dde6ef;
+  --color-surface-container-highest: #d1dce8;
 
   /* Text */
-  --color-on-surface: #121a1a;
-  --color-on-surface-variant: #404848;
-  --color-outline: #c0c8c8;
-  --color-outline-variant: #c0c8c8;
+  --color-on-surface: #101a2c;
+  --color-on-surface-variant: #4a5a70;
+  --color-outline: #b8c6d6;
+  --color-outline-variant: #c7d3e0;
 
-  /* Brand */
-  --color-primary: #002627;
+  /* Brand -- ice-blue darkened for legibility as text/borders on light glass */
+  --color-primary: #0e7fae;
   --color-on-primary: #ffffff;
-  --color-accent: #c97a2c;
-  --color-accent-soft: #fceedb;
+  --color-accent: #7c4fc9;
+  --color-accent-soft: #ede4fb;
 
-  /* Semantic: risk tiers -- Approve uses a teal-cyan tied to the brand
-     primary rather than a generic traffic-light green. Both approve and
-     review are darkened past their "brand" hue for WCAG AA text contrast
-     (4.5:1) against their soft backgrounds at 13px/600-weight badge size. */
-  --color-approve: #1f6b6b;
-  --color-approve-soft: #dcf0f0;
-  --color-review: #96591c;
-  --color-review-soft: #fceedb;
-  --color-reject: #a13d2e;
-  --color-reject-soft: #f6e2dd;
+  /* Semantic: risk tiers -- three distinct hues, none reusing --color-primary.
+     Darkened past their "brand" hue for WCAG AA text contrast (4.5:1+)
+     against their soft backgrounds at 13px/600-weight badge size. */
+  --color-approve: #0a6e62;
+  --color-approve-soft: #dcf3ef;
+  --color-review: #8a5709;
+  --color-review-soft: #faedd7;
+  --color-reject: #b02525;
+  --color-reject-soft: #fbe2e2;
+
+  /* Glass surface: translucent panel + blur + luminous border, the core
+     Glacier pattern. Alpha values are lower in light mode (less need for
+     opacity to stay legible against a pale base). */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(16, 26, 44, 0.10);
+  --glass-blur: 16px;
+  --glass-blur-elevated: 24px;
+  --glass-glow: rgba(14, 127, 174, 0.12);
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
@@ -59,67 +78,82 @@
   --space-2xl: 48px;
   --space-3xl: 64px;
 
-  /* Shadows -- tinted deep teal at low opacity, not muddy grey */
-  --shadow-sm: 0 1px 2px rgba(0, 38, 39, 0.04), 0 1px 3px rgba(0, 38, 39, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 38, 39, 0.06), 0 2px 4px rgba(0, 38, 39, 0.04);
+  /* Shadows -- depth via blur/opacity is the primary Glacier pattern;
+     shadows stay minimal, tinted toward the brand blue rather than grey. */
+  --shadow-sm: 0 1px 2px rgba(14, 127, 174, 0.06), 0 1px 3px rgba(14, 127, 174, 0.08);
+  --shadow-md: 0 8px 24px rgba(14, 127, 174, 0.10), 0 2px 6px rgba(14, 127, 174, 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-background: #0a1414;
-    --color-surface: #121e1e;
-    --color-surface-container-low: #162323;
-    --color-surface-container: #1c2b2a;
-    --color-surface-container-high: #233533;
-    --color-surface-container-highest: #2a3d3b;
+    --color-background: #0a0e1a;
+    --color-surface: #0f1524;
+    --color-surface-container-low: #111828;
+    --color-surface-container: #141c2e;
+    --color-surface-container-high: #1a2438;
+    --color-surface-container-highest: #202c42;
 
-    --color-on-surface: #e8f2f0;
-    --color-on-surface-variant: #a8bcb9;
-    --color-outline: #3d504d;
-    --color-outline-variant: #2a3d3b;
+    --color-on-surface: #e0e8f0;
+    --color-on-surface-variant: #a0b4c4;
+    --color-outline: #4a6070;
+    --color-outline-variant: #2a3a48;
 
-    --color-primary: #8fbde0;
-    --color-on-primary: #062440;
-    --color-accent: #e3a35f;
-    --color-accent-soft: #2e2113;
+    --color-primary: #7dd3fc;
+    --color-on-primary: #001f2e;
+    --color-accent: #c8a0f0;
+    --color-accent-soft: #3d2060;
 
-    --color-approve: #5fc4c4;
-    --color-approve-soft: #143333;
-    --color-review: #e3a35f;
-    --color-review-soft: #2e2113;
-    --color-reject: #e08172;
-    --color-reject-soft: #331a15;
+    --color-approve: #5eead4;
+    --color-approve-soft: #123d36;
+    --color-review: #fdba74;
+    --color-review-soft: #3d2a10;
+    --color-reject: #ff6b6b;
+    --color-reject-soft: #3d1414;
+
+    --glass-bg: rgba(15, 21, 36, 0.55);
+    --glass-bg-elevated: rgba(15, 21, 36, 0.72);
+    --glass-border: rgba(125, 211, 252, 0.12);
+    --glass-blur: 16px;
+    --glass-blur-elevated: 24px;
+    --glass-glow: rgba(125, 211, 252, 0.15);
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
   }
 }
 
 :root[data-theme='dark'] {
-  --color-background: #0a1414;
-  --color-surface: #121e1e;
-  --color-surface-container-low: #162323;
-  --color-surface-container: #1c2b2a;
-  --color-surface-container-high: #233533;
-  --color-surface-container-highest: #2a3d3b;
+  --color-background: #0a0e1a;
+  --color-surface: #0f1524;
+  --color-surface-container-low: #111828;
+  --color-surface-container: #141c2e;
+  --color-surface-container-high: #1a2438;
+  --color-surface-container-highest: #202c42;
 
-  --color-on-surface: #e8f2f0;
-  --color-on-surface-variant: #a8bcb9;
-  --color-outline: #3d504d;
-  --color-outline-variant: #2a3d3b;
+  --color-on-surface: #e0e8f0;
+  --color-on-surface-variant: #a0b4c4;
+  --color-outline: #4a6070;
+  --color-outline-variant: #2a3a48;
 
-  --color-primary: #8fbde0;
-  --color-on-primary: #062440;
-  --color-accent: #e3a35f;
-  --color-accent-soft: #2e2113;
+  --color-primary: #7dd3fc;
+  --color-on-primary: #001f2e;
+  --color-accent: #c8a0f0;
+  --color-accent-soft: #3d2060;
 
-  --color-approve: #5fc4c4;
-  --color-approve-soft: #143333;
-  --color-review: #e3a35f;
-  --color-review-soft: #2e2113;
-  --color-reject: #e08172;
-  --color-reject-soft: #331a15;
+  --color-approve: #5eead4;
+  --color-approve-soft: #123d36;
+  --color-review: #fdba74;
+  --color-review-soft: #3d2a10;
+  --color-reject: #ff6b6b;
+  --color-reject-soft: #3d1414;
+
+  --glass-bg: rgba(15, 21, 36, 0.55);
+  --glass-bg-elevated: rgba(15, 21, 36, 0.72);
+  --glass-border: rgba(125, 211, 252, 0.12);
+  --glass-blur: 16px;
+  --glass-blur-elevated: 24px;
+  --glass-glow: rgba(125, 211, 252, 0.15);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
 }

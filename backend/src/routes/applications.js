@@ -3,6 +3,8 @@ import { createApplicationSchema, applicantFeaturesSchema } from "../schemas/app
 import { stripProtectedAttributes } from "../guardrails/stripProtectedAttributes.js";
 import { scoreApplicant, counterfactual as runCounterfactual, ModelServiceError } from "../services/modelServiceClient.js";
 import { getLLMProvider } from "../services/llm/index.js";
+import { detectFraudSignals } from "../fraud/detectSignals.js";
+import { pool } from "../db/pool.js";
 import {
   insertApplication,
   insertAuditLogEntry,
@@ -28,6 +30,13 @@ applicationsRouter.post("/", async (req, res) => {
 
     const scoreResult = await scoreApplicant(applicant);
 
+    // Runs against existing rows before this application is inserted, so
+    // the duplicate-narrative check can't match itself.
+    const fraudFlags = await detectFraudSignals(pool, {
+      features: applicant,
+      narrative: strippedNarrative || null,
+    });
+
     const llm = getLLMProvider();
     const { explanation, modelId } = await llm.generateExplanation({
       probability: scoreResult.probability_of_default,
@@ -42,6 +51,7 @@ applicationsRouter.post("/", async (req, res) => {
       riskTier: scoreResult.risk_tier,
       explanation,
       topContributingFeatures: scoreResult.top_contributing_features,
+      fraudFlags,
     });
 
     await insertAuditLogEntry({

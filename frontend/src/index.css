@@ -13,6 +13,10 @@ body {
 
 body {
   background: var(--color-background);
+  background-image:
+    radial-gradient(circle at 15% 10%, var(--glass-glow) 0%, transparent 45%),
+    radial-gradient(circle at 85% 60%, var(--glass-glow) 0%, transparent 40%);
+  background-attachment: fixed;
   color: var(--color-on-surface);
   font-family: var(--font-sans);
   font-size: 16px;
@@ -75,6 +79,7 @@ button {
 .btn-primary {
   background: var(--color-primary);
   color: var(--color-on-primary);
+  box-shadow: 0 0 20px var(--glass-glow);
 }
 
 .btn-primary:hover {
@@ -82,14 +87,16 @@ button {
 }
 
 .btn-secondary {
-  background: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   color: var(--color-on-surface);
-  border: 1px solid var(--color-outline-variant);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
 }
 
 .btn-secondary:hover {
-  background: var(--color-surface-container-low);
+  background: var(--glass-bg-elevated);
 }
 
 .btn:disabled {
@@ -101,13 +108,21 @@ button {
   width: 100%;
 }
 
-/* ---------- Cards ---------- */
+/* ---------- Cards (Glacier glass panel) ---------- */
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-outline-variant);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   padding: var(--space-lg);
+}
+
+.card-elevated {
+  background: var(--glass-bg-elevated);
+  backdrop-filter: blur(var(--glass-blur-elevated));
+  -webkit-backdrop-filter: blur(var(--glass-blur-elevated));
 }
 
 /* ---------- Form fields ---------- */
@@ -152,8 +167,8 @@ textarea.input {
 select.input:focus,
 textarea.input:focus {
   outline: none;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-accent-soft);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--glass-glow);
 }
 
 textarea.input {
@@ -235,9 +250,10 @@ textarea.input {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: color-mix(in srgb, var(--color-background) 85%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--color-outline-variant);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .app-header-inner {
@@ -323,7 +339,7 @@ textarea.input {
   justify-content: center;
   overflow: hidden;
   padding: var(--space-lg);
-  background: radial-gradient(circle at 20% 20%, #0f3d3e 0%, #002627 55%, #001516 100%);
+  background: radial-gradient(circle at 20% 20%, #0e4d6e 0%, #0a0e1a 55%, #05070d 100%);
 }
 
 .login-scene-blob {
@@ -339,7 +355,7 @@ textarea.input {
   height: 420px;
   top: -120px;
   left: -100px;
-  background: radial-gradient(circle, #8fbde0 0%, transparent 70%);
+  background: radial-gradient(circle, #7dd3fc 0%, transparent 70%);
 }
 
 .login-scene-blob-2 {
@@ -347,7 +363,7 @@ textarea.input {
   height: 360px;
   bottom: -140px;
   right: -80px;
-  background: radial-gradient(circle, #c97a2c 0%, transparent 70%);
+  background: radial-gradient(circle, #c8a0f0 0%, transparent 70%);
   opacity: 0.25;
 }
 
@@ -356,7 +372,7 @@ textarea.input {
   height: 260px;
   bottom: 10%;
   left: 8%;
-  background: radial-gradient(circle, #3d6fa8 0%, transparent 70%);
+  background: radial-gradient(circle, #5eead4 0%, transparent 70%);
   opacity: 0.2;
 }
 
@@ -365,29 +381,29 @@ textarea.input {
   z-index: 1;
   width: 100%;
   max-width: 400px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 21, 36, 0.55);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(125, 211, 252, 0.14);
   border-radius: var(--radius-xl);
   padding: var(--space-xl);
-  box-shadow: 0 20px 60px rgba(0, 10, 10, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(125, 211, 252, 0.08);
 }
 
 .login-card-brand {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  color: #eaf5f3;
+  color: #e0e8f0;
   font-size: 15px;
   font-weight: 600;
   margin-bottom: var(--space-lg);
 }
 
 .login-card-brand .app-header-mark {
-  background: rgba(255, 255, 255, 0.14);
-  color: #eaf5f3;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(125, 211, 252, 0.14);
+  color: #e0e8f0;
+  border: 1px solid rgba(125, 211, 252, 0.24);
 }
 
 .login-card-title {
@@ -398,19 +414,19 @@ textarea.input {
 }
 
 .login-card-subtitle {
-  color: rgba(234, 245, 243, 0.7);
+  color: rgba(224, 232, 240, 0.7);
   font-size: 14px;
   margin: 0 0 var(--space-lg);
 }
 
 .login-card-label {
-  color: rgba(234, 245, 243, 0.85);
+  color: rgba(224, 232, 240, 0.85);
 }
 
 .login-card-error {
-  background: rgba(224, 129, 114, 0.18);
-  border: 1px solid rgba(224, 129, 114, 0.4);
-  color: #f3c9c0;
+  background: rgba(255, 107, 107, 0.14);
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  color: #ffb3b3;
   padding: var(--space-md);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-md);

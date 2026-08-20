@@ -241,15 +241,21 @@ export function ApplicationForm() {
             </div>
           </section>
 
-          <section className="card" style={{ marginBottom: 'var(--space-lg)', background: 'var(--color-primary)', color: 'var(--color-on-primary)' }}>
-            <h2 className="label-caps" style={{ marginBottom: 4, color: 'var(--color-on-primary)', opacity: 0.7 }}>Alternative data</h2>
-            <p style={{ opacity: 0.85, fontSize: 14, marginTop: 0, marginBottom: 'var(--space-lg)' }}>
+          <section
+            className="card"
+            style={{
+              marginBottom: 'var(--space-lg)',
+              boxShadow: '0 0 0 1px var(--color-primary) inset, 0 0 30px var(--glass-glow)',
+            }}
+          >
+            <h2 className="label-caps" style={{ marginBottom: 4, color: 'var(--color-primary)' }}>Alternative data</h2>
+            <p className="text-muted" style={{ fontSize: 14, marginTop: 0, marginBottom: 'var(--space-lg)' }}>
               We look beyond traditional scores. These factors help us say "yes" to more people —
               whether you're a freelancer, small business owner, student, or new to earning.
             </p>
 
             <div className="field">
-              <label className="field-label" htmlFor="streak" style={{ color: 'inherit' }}>
+              <label className="field-label" htmlFor="streak">
                 Utility payment streak <span className="mono">{form.utilityStreak} mo</span>
               </label>
               <input
@@ -264,7 +270,7 @@ export function ApplicationForm() {
             </div>
 
             <div className="field">
-              <label className="field-label" htmlFor="recharge" style={{ color: 'inherit' }}>
+              <label className="field-label" htmlFor="recharge">
                 Mobile recharge regularity
               </label>
               <input
@@ -276,14 +282,14 @@ export function ApplicationForm() {
                 value={form.rechargeRegularity}
                 onChange={set('rechargeRegularity')}
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.7 }}>
+              <div className="field-hint" style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Irregular</span>
                 <span>Very regular</span>
               </div>
             </div>
 
             <div className="field">
-              <label className="field-label" htmlFor="trips" style={{ color: 'inherit' }}>
+              <label className="field-label" htmlFor="trips">
                 Income-generating activity (last 30 days)
               </label>
               <input
@@ -295,14 +301,14 @@ export function ApplicationForm() {
                 value={form.gigTrips}
                 onChange={set('gigTrips')}
               />
-              <span className="field-hint" style={{ color: 'inherit', opacity: 0.7 }}>
+              <span className="field-hint">
                 Any countable measure of activity — platform trips, freelance jobs, shop
                 transactions, tuition sessions, whatever applies to your work.
               </span>
             </div>
 
             <div className="field">
-              <label className="field-label" htmlFor="rating" style={{ color: 'inherit' }}>
+              <label className="field-label" htmlFor="rating">
                 Platform or client rating, if applicable <span className="mono">{Number(form.gigRating).toFixed(1)}</span>
               </label>
               <input
@@ -315,7 +321,7 @@ export function ApplicationForm() {
                 value={form.gigRating}
                 onChange={set('gigRating')}
               />
-              <span className="field-hint" style={{ color: 'inherit', opacity: 0.7 }}>
+              <span className="field-hint">
                 From a gig app, marketplace, or client feedback. Leave at the default if this
                 doesn't apply to you.
               </span>

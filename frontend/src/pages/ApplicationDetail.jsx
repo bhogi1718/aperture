@@ -7,6 +7,11 @@ import { featureLabel } from '../lib/featureLabels';
 import { useAuth } from '../context/AuthContext';
 import { getApplication } from '../api/client';
 
+const FRAUD_FLAG_LABELS = {
+  implausible_activity_no_footprint: 'High claimed activity volume with no other financial footprint (utility payments or recharge regularity).',
+  duplicate_narrative_recent: 'This narrative text matches another application submitted in the last hour.',
+};
+
 export function ApplicationDetail() {
   const { isAuthenticated, token } = useAuth();
   const { id } = useParams();
@@ -51,6 +56,19 @@ export function ApplicationDetail() {
                 {(application.probability_of_default * 100).toFixed(1)}% estimated risk
               </p>
             </div>
+
+            {application.fraud_flags?.length > 0 && (
+              <div className="card" style={{ borderColor: 'var(--color-reject)', background: 'var(--color-reject-soft)', marginBottom: 'var(--space-lg)' }}>
+                <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 'var(--space-sm)', color: 'var(--color-reject)' }}>
+                  Fraud signals flagged for review
+                </h2>
+                <ul style={{ margin: 0, paddingLeft: 'var(--space-lg)', color: 'var(--color-reject)', fontSize: 14 }}>
+                  {application.fraud_flags.map((flag) => (
+                    <li key={flag}>{FRAUD_FLAG_LABELS[flag] ?? flag}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
               <div className="card">
