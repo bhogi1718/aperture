@@ -8,11 +8,12 @@ export async function insertApplication({
   explanation,
   topContributingFeatures,
   fraudFlags = [],
+  applicantId = null,
 }) {
   const { rows } = await pool.query(
     `INSERT INTO applications
-       (features, transaction_narrative, probability_of_default, risk_tier, explanation, top_contributing_features, fraud_flags)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+       (features, transaction_narrative, probability_of_default, risk_tier, explanation, top_contributing_features, fraud_flags, applicant_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING id, created_at`,
     [
       JSON.stringify(features),
@@ -22,6 +23,7 @@ export async function insertApplication({
       explanation,
       JSON.stringify(topContributingFeatures),
       fraudFlags,
+      applicantId,
     ]
   );
   return rows[0];

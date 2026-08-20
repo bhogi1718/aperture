@@ -14,11 +14,14 @@ import {
   getApplicationById,
 } from "../db/applicationsRepository.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { requireApplicantAuth } from "../middleware/requireApplicantAuth.js";
 
 export const applicationsRouter = Router();
 
-// Public: applicants submit without logging in.
-applicationsRouter.post("/", async (req, res) => {
+// Applicants must verify their phone (OTP) before submitting -- see
+// routes/applicantAuth.js. The resulting application is linked to their
+// verified identity via applicant_id.
+applicationsRouter.post("/", requireApplicantAuth, async (req, res) => {
   const parsed = createApplicationSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
@@ -52,6 +55,7 @@ applicationsRouter.post("/", async (req, res) => {
       explanation,
       topContributingFeatures: scoreResult.top_contributing_features,
       fraudFlags,
+      applicantId: req.applicant.sub,
     });
 
     await insertAuditLogEntry({

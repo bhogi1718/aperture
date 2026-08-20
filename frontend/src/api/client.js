@@ -20,11 +20,30 @@ async function request(path, { method = 'GET', body, token } = {}) {
   return data;
 }
 
-export function submitApplication({ applicant, transactionNarrative }) {
+export function submitApplication({ applicant, transactionNarrative, token }) {
   return request('/api/applications', {
     method: 'POST',
     body: { applicant, transactionNarrative },
+    token,
   });
+}
+
+export function requestOtp({ phone, name }) {
+  return request('/api/applicant-auth/request-otp', {
+    method: 'POST',
+    body: { phone, name },
+  });
+}
+
+export function verifyOtp({ phone, name, code }) {
+  return request('/api/applicant-auth/verify-otp', {
+    method: 'POST',
+    body: { phone, name, code },
+  });
+}
+
+export function getMyApplications({ token }) {
+  return request('/api/applicant-auth/me/applications', { token });
 }
 
 export function runCounterfactual({ applicant, featureToPerturb, newValue }) {

@@ -3,6 +3,7 @@ import cors from "cors";
 import { env } from "./config/env.js";
 import { applicationsRouter } from "./routes/applications.js";
 import { authRouter } from "./routes/auth.js";
+import { applicantAuthRouter } from "./routes/applicantAuth.js";
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 app.use("/api/applications", applicationsRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/applicant-auth", applicantAuthRouter);
 
 app.use((err, req, res, next) => {
   console.error(err);

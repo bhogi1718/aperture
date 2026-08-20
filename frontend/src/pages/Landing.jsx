@@ -28,7 +28,7 @@ export function Landing() {
           <p className="text-muted" style={{ fontSize: 18, marginBottom: 'var(--space-xl)' }}>
             Built from your real payment behavior, not just a bureau file.
           </p>
-          <Link to="/apply" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px' }}>
+          <Link to="/verify" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px' }}>
             Check my eligibility →
           </Link>
         </div>

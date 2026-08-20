@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
+import { useApplicantAuth } from '../context/ApplicantAuthContext';
 import { submitApplication } from '../api/client';
 
 const initialState = {
@@ -79,10 +80,15 @@ function Stepper({ label, value, onChange, max = 20 }) {
 }
 
 export function ApplicationForm() {
+  const { isVerified, token } = useApplicantAuth();
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  if (!isVerified) {
+    return <Navigate to="/verify" replace />;
+  }
 
   function set(field) {
     return (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -103,6 +109,7 @@ export function ApplicationForm() {
       const result = await submitApplication({
         applicant,
         transactionNarrative: form.narrative || undefined,
+        token,
       });
       navigate('/results', { state: { result, applicant } });
     } catch (err) {
