@@ -436,6 +436,11 @@ textarea.input {
 .login-card .input {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(255, 255, 255, 0.2);
+  color: #10151f;
+}
+
+.login-card .input::placeholder {
+  color: rgba(16, 21, 31, 0.45);
 }
 
 .login-card-back {
