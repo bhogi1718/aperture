@@ -21,12 +21,14 @@ export const env = {
   modelServiceUrl: process.env.MODEL_SERVICE_URL ?? "http://localhost:8000",
 
   // OTP / applicant identity
-  otpProvider: process.env.OTP_PROVIDER ?? "mock",
+  emailOtpProvider: process.env.EMAIL_OTP_PROVIDER ?? "mock",
   applicantJwtSecret: process.env.APPLICANT_JWT_SECRET ?? process.env.JWT_SECRET ?? "",
   nodeEnv: process.env.NODE_ENV ?? "development",
 
-  // Only required when OTP_PROVIDER=whatsapp
-  whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID ?? "",
-  whatsappAccessToken: process.env.WHATSAPP_ACCESS_TOKEN ?? "",
-  whatsappOtpTemplateName: process.env.WHATSAPP_OTP_TEMPLATE_NAME ?? "otp_verification",
+  // Only required when EMAIL_OTP_PROVIDER=smtp
+  smtpHost: process.env.SMTP_HOST ?? "",
+  smtpPort: Number(process.env.SMTP_PORT ?? 587),
+  smtpUser: process.env.SMTP_USER ?? "",
+  smtpPassword: process.env.SMTP_PASSWORD ?? "",
+  smtpFromAddress: process.env.SMTP_FROM_ADDRESS ?? "",
 };

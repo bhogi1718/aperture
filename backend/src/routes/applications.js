@@ -18,7 +18,7 @@ import { requireApplicantAuth } from "../middleware/requireApplicantAuth.js";
 
 export const applicationsRouter = Router();
 
-// Applicants must verify their phone (OTP) before submitting -- see
+// Applicants must verify their email (OTP) before submitting -- see
 // routes/applicantAuth.js. The resulting application is linked to their
 // verified identity via applicant_id.
 applicationsRouter.post("/", requireApplicantAuth, async (req, res) => {

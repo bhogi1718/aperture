@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ApplicantAuthProvider } from './context/ApplicantAuthContext';
 import { Landing } from './pages/Landing';
-import { VerifyPhone } from './pages/VerifyPhone';
+import { VerifyEmail } from './pages/VerifyEmail';
 import { ApplicationForm } from './pages/ApplicationForm';
 import { Results } from './pages/Results';
 import { ReviewerLogin } from './pages/ReviewerLogin';
@@ -15,7 +15,7 @@ export default function App() {
       <ApplicantAuthProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/verify" element={<VerifyPhone />} />
+          <Route path="/verify" element={<VerifyEmail />} />
           <Route path="/apply" element={<ApplicationForm />} />
           <Route path="/results" element={<Results />} />
           <Route path="/reviewer/login" element={<ReviewerLogin />} />

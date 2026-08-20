@@ -4,13 +4,13 @@ const OTP_EXPIRY_MINUTES = 5;
 const OTP_REQUEST_COOLDOWN_SECONDS = 60;
 const MAX_VERIFY_ATTEMPTS = 5;
 
-export async function canRequestOtp(phone) {
+export async function canRequestOtp(email) {
   const { rows } = await pool.query(
     `SELECT created_at FROM otp_codes
-     WHERE phone = $1
+     WHERE email = $1
      ORDER BY created_at DESC
      LIMIT 1`,
-    [phone]
+    [email]
   );
   if (rows.length === 0) return true;
 
@@ -18,29 +18,29 @@ export async function canRequestOtp(phone) {
   return secondsSinceLast >= OTP_REQUEST_COOLDOWN_SECONDS;
 }
 
-export async function createOtpCode(phone, code) {
+export async function createOtpCode(email, code) {
   const { rows } = await pool.query(
-    `INSERT INTO otp_codes (phone, code, expires_at)
+    `INSERT INTO otp_codes (email, code, expires_at)
      VALUES ($1, $2, now() + ($3 || ' minutes')::interval)
      RETURNING id, expires_at`,
-    [phone, code, OTP_EXPIRY_MINUTES]
+    [email, code, OTP_EXPIRY_MINUTES]
   );
   return rows[0];
 }
 
 /**
  * Verifies a code against the most recent unverified, unexpired OTP for
- * this phone. Increments the attempt counter on every check (including
+ * this email. Increments the attempt counter on every check (including
  * failures) so a code can be locked out after MAX_VERIFY_ATTEMPTS guesses.
  * @returns {Promise<"ok" | "not_found" | "expired" | "too_many_attempts" | "incorrect">}
  */
-export async function verifyOtpCode(phone, code) {
+export async function verifyOtpCode(email, code) {
   const { rows } = await pool.query(
     `SELECT id, code, expires_at, attempts FROM otp_codes
-     WHERE phone = $1 AND verified_at IS NULL
+     WHERE email = $1 AND verified_at IS NULL
      ORDER BY created_at DESC
      LIMIT 1`,
-    [phone]
+    [email]
   );
   if (rows.length === 0) return "not_found";
 
@@ -56,15 +56,15 @@ export async function verifyOtpCode(phone, code) {
   return "ok";
 }
 
-export async function findApplicantByPhone(phone) {
-  const { rows } = await pool.query(`SELECT id, phone, name, created_at FROM applicant_accounts WHERE phone = $1`, [phone]);
+export async function findApplicantByEmail(email) {
+  const { rows } = await pool.query(`SELECT id, email, name, created_at FROM applicant_accounts WHERE email = $1`, [email]);
   return rows[0] ?? null;
 }
 
-export async function createApplicantAccount(phone, name) {
+export async function createApplicantAccount(email, name) {
   const { rows } = await pool.query(
-    `INSERT INTO applicant_accounts (phone, name) VALUES ($1, $2) RETURNING id, phone, name, created_at`,
-    [phone, name]
+    `INSERT INTO applicant_accounts (email, name) VALUES ($1, $2) RETURNING id, email, name, created_at`,
+    [email, name]
   );
   return rows[0];
 }

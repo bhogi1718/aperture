@@ -28,17 +28,17 @@ export function submitApplication({ applicant, transactionNarrative, token }) {
   });
 }
 
-export function requestOtp({ phone, name }) {
+export function requestOtp({ email, name }) {
   return request('/api/applicant-auth/request-otp', {
     method: 'POST',
-    body: { phone, name },
+    body: { email, name },
   });
 }
 
-export function verifyOtp({ phone, name, code }) {
+export function verifyOtp({ email, name, code }) {
   return request('/api/applicant-auth/verify-otp', {
     method: 'POST',
-    body: { phone, name, code },
+    body: { email, name, code },
   });
 }
 

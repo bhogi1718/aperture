@@ -3,12 +3,12 @@ import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { env } from "../config/env.js";
-import { getOtpProvider } from "../services/otp/index.js";
+import { getEmailOtpProvider } from "../services/emailOtp/index.js";
 import {
   canRequestOtp,
   createOtpCode,
   verifyOtpCode,
-  findApplicantByPhone,
+  findApplicantByEmail,
   createApplicantAccount,
   touchApplicantLogin,
   listApplicationsForApplicant,
@@ -17,13 +17,8 @@ import { requireApplicantAuth } from "../middleware/requireApplicantAuth.js";
 
 export const applicantAuthRouter = Router();
 
-// E.164-ish: + followed by 8-15 digits. Not exhaustive phone validation,
-// just enough to reject obviously malformed input before it reaches an
-// OTP provider (and, eventually, a real per-message cost).
-export const PHONE_PATTERN = /^\+[1-9]\d{7,14}$/;
-
 export const requestOtpSchema = z.object({
-  phone: z.string().regex(PHONE_PATTERN, "Phone number must be in international format, e.g. +919876543210"),
+  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
   name: z.string().trim().min(1).max(100),
 });
 
@@ -32,21 +27,21 @@ applicantAuthRouter.post("/request-otp", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
   }
-  const { phone, name } = parsed.data;
+  const { email, name } = parsed.data;
 
   try {
-    const allowed = await canRequestOtp(phone);
+    const allowed = await canRequestOtp(email);
     if (!allowed) {
       return res.status(429).json({ error: "Please wait before requesting another code" });
     }
 
     const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
-    const { expires_at } = await createOtpCode(phone, code);
+    const { expires_at } = await createOtpCode(email, code);
 
     // The name isn't persisted until verification succeeds (createApplicantAccount),
-    // so a re-request just needs the phone; name is re-validated at verify time.
-    const otp = getOtpProvider();
-    await otp.sendCode({ phone, code });
+    // so a re-request just needs the email; name is re-validated at verify time.
+    const otp = getEmailOtpProvider();
+    await otp.sendCode({ email, code });
 
     const response = { message: "Verification code sent", expiresAt: expires_at };
     if (env.nodeEnv !== "production" && otp.name === "mock") {
@@ -60,7 +55,7 @@ applicantAuthRouter.post("/request-otp", async (req, res) => {
 });
 
 export const verifyOtpSchema = z.object({
-  phone: z.string().regex(PHONE_PATTERN),
+  email: z.string().trim().toLowerCase().email(),
   name: z.string().trim().min(1).max(100),
   code: z.string().regex(/^\d{6}$/, "Code must be 6 digits"),
 });
@@ -70,12 +65,12 @@ applicantAuthRouter.post("/verify-otp", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
   }
-  const { phone, name, code } = parsed.data;
+  const { email, name, code } = parsed.data;
 
   try {
-    const result = await verifyOtpCode(phone, code);
+    const result = await verifyOtpCode(email, code);
     if (result === "not_found") {
-      return res.status(400).json({ error: "No verification code found for this number. Request a new one." });
+      return res.status(400).json({ error: "No verification code found for this email. Request a new one." });
     }
     if (result === "expired") {
       return res.status(400).json({ error: "Verification code expired. Request a new one." });
@@ -87,15 +82,15 @@ applicantAuthRouter.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ error: "Incorrect code" });
     }
 
-    let applicant = await findApplicantByPhone(phone);
+    let applicant = await findApplicantByEmail(email);
     const isReturning = Boolean(applicant);
     if (!applicant) {
-      applicant = await createApplicantAccount(phone, name);
+      applicant = await createApplicantAccount(email, name);
     } else {
       await touchApplicantLogin(applicant.id);
     }
 
-    const token = jwt.sign({ sub: applicant.id, phone: applicant.phone, role: "applicant" }, env.applicantJwtSecret, {
+    const token = jwt.sign({ sub: applicant.id, email: applicant.email, role: "applicant" }, env.applicantJwtSecret, {
       expiresIn: "24h",
     });
 
@@ -103,7 +98,7 @@ applicantAuthRouter.post("/verify-otp", async (req, res) => {
 
     res.json({
       token,
-      applicant: { id: applicant.id, name: applicant.name, phone: applicant.phone },
+      applicant: { id: applicant.id, name: applicant.name, email: applicant.email },
       isReturning,
       applications,
     });

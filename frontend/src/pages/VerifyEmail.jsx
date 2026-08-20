@@ -9,13 +9,13 @@ function formatDate(iso) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 }
 
-export function VerifyPhone() {
+export function VerifyEmail() {
   const { signIn } = useApplicantAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState('details'); // 'details' | 'code' | 'history'
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('+91');
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [devCode, setDevCode] = useState(null);
   const [error, setError] = useState(null);
@@ -27,7 +27,7 @@ export function VerifyPhone() {
     setError(null);
     setSubmitting(true);
     try {
-      const result = await requestOtp({ phone, name });
+      const result = await requestOtp({ email, name });
       setDevCode(result.devCode ?? null);
       setStep('code');
     } catch (err) {
@@ -42,7 +42,7 @@ export function VerifyPhone() {
     setError(null);
     setSubmitting(true);
     try {
-      const result = await verifyOtp({ phone, name, code });
+      const result = await verifyOtp({ email, name, code });
       signIn(result.token, result.applicant);
 
       if (result.isReturning && result.applications.length > 0) {
@@ -64,7 +64,7 @@ export function VerifyPhone() {
       <main className="page-narrow" style={{ paddingTop: 'var(--space-3xl)', paddingBottom: 'var(--space-3xl)', maxWidth: step === 'history' ? 640 : 420 }}>
         {step === 'details' && (
           <div className="card">
-            <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Verify your phone</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Verify your email</h1>
             <p className="text-muted" style={{ marginTop: 0, marginBottom: 'var(--space-lg)', fontSize: 14 }}>
               We'll send a one-time code to confirm it's really you. If you've applied before,
               we'll show your previous results.
@@ -90,17 +90,16 @@ export function VerifyPhone() {
                 />
               </div>
               <div className="field">
-                <label className="field-label" htmlFor="phone">Phone number</label>
+                <label className="field-label" htmlFor="email">Email address</label>
                 <input
-                  id="phone"
+                  id="email"
                   className="input"
-                  type="tel"
-                  placeholder="+919876543210"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  type="email"
+                  placeholder="priya@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <span className="field-hint">Include your country code, e.g. +91 for India.</span>
               </div>
               <button type="submit" className="btn btn-primary btn-block" disabled={submitting} style={{ marginTop: 'var(--space-sm)' }}>
                 {submitting ? 'Sending code…' : 'Send verification code'}
@@ -113,12 +112,12 @@ export function VerifyPhone() {
           <div className="card">
             <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Enter your code</h1>
             <p className="text-muted" style={{ marginTop: 0, marginBottom: 'var(--space-lg)', fontSize: 14 }}>
-              We sent a 6-digit code to {phone}.
+              We sent a 6-digit code to {email}.
             </p>
 
             {devCode && (
               <div style={{ background: 'var(--color-accent-soft)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-md)', fontSize: 13 }}>
-                <strong>Dev mode:</strong> your code is <span className="mono">{devCode}</span> (no real message was sent).
+                <strong>Dev mode:</strong> your code is <span className="mono">{devCode}</span> (no real email was sent).
               </div>
             )}
 
@@ -154,7 +153,7 @@ export function VerifyPhone() {
               style={{ marginTop: 'var(--space-sm)' }}
               onClick={() => { setStep('details'); setCode(''); setError(null); }}
             >
-              ← Use a different number
+              ← Use a different email
             </button>
           </div>
         )}
@@ -163,7 +162,7 @@ export function VerifyPhone() {
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>Welcome back, {name}</h1>
             <p className="text-muted" style={{ marginTop: 0, marginBottom: 'var(--space-lg)' }}>
-              Here's what we have on file for this number.
+              Here's what we have on file for this email.
             </p>
 
             <div className="card" style={{ padding: 0, marginBottom: 'var(--space-lg)' }}>
