@@ -29,10 +29,12 @@
   --color-accent-soft: #fceedb;
 
   /* Semantic: risk tiers -- Approve uses a teal-cyan tied to the brand
-     primary rather than a generic traffic-light green */
-  --color-approve: #2a8c8c;
+     primary rather than a generic traffic-light green. Both approve and
+     review are darkened past their "brand" hue for WCAG AA text contrast
+     (4.5:1) against their soft backgrounds at 13px/600-weight badge size. */
+  --color-approve: #1f6b6b;
   --color-approve-soft: #dcf0f0;
-  --color-review: #c97a2c;
+  --color-review: #96591c;
   --color-review-soft: #fceedb;
   --color-reject: #a13d2e;
   --color-reject-soft: #f6e2dd;

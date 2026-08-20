@@ -3,6 +3,7 @@ import { Link, useLocation, Navigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { RiskBadge } from '../components/RiskBadge';
 import { FeatureBar } from '../components/FeatureBar';
+import { featureLabel } from '../lib/featureLabels';
 import { runCounterfactual } from '../api/client';
 
 const TIER_COPY = {
@@ -12,10 +13,10 @@ const TIER_COPY = {
 };
 
 const COUNTERFACTUAL_FEATURES = [
-  { key: 'utility_payment_streak', label: 'Utility Payment Streak', min: 0, max: 36, step: 1 },
-  { key: 'recharge_regularity_score', label: 'Mobile Recharge Regularity', min: 0, max: 100, step: 1 },
-  { key: 'gig_rating', label: 'Platform or Client Rating', min: 1, max: 5, step: 0.1 },
-];
+  { key: 'utility_payment_streak', min: 0, max: 36, step: 1 },
+  { key: 'recharge_regularity_score', min: 0, max: 100, step: 1 },
+  { key: 'gig_rating', min: 1, max: 5, step: 0.1 },
+].map((f) => ({ ...f, label: featureLabel(f.key) }));
 
 function CounterfactualExplorer({ applicant }) {
   const [featureKey, setFeatureKey] = useState(COUNTERFACTUAL_FEATURES[0].key);

@@ -1,4 +1,4 @@
-const FEATURE_LABELS = {
+export const FEATURE_LABELS = {
   RevolvingUtilizationOfUnsecuredLines: "credit utilization",
   age: "applicant age",
   "NumberOfTime30-59DaysPastDueNotWorse": "30-59 day late payments",

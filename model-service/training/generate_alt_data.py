@@ -19,6 +19,20 @@ Columns added:
                                  (platform trips, freelance jobs, shop transactions,
                                  or similar countable activity), 0-400
   gig_rating                 -- platform or client rating where applicable, 1.0-5.0
+
+Known limitation: gig_trip_volume and gig_rating share ONE distribution
+shape across all archetypes -- a gamma-distributed activity count (0-400)
+and a 1.0-5.0 rating, both originally calibrated to look like gig-platform
+data (trip counts, star ratings). The display labels and narrative
+generator were broadened to cover freelancers/shop owners/students, but
+the underlying numeric distributions were not recalibrated per source --
+a real freelancer's monthly invoice count or a shop owner's transaction
+volume could plausibly follow a different shape/range than a gig
+platform's trip count, and "rating" may not apply to every archetype at
+all. Acceptable as a single generic activity+rating proxy for this
+prototype's scope; a production system would calibrate separate
+distributions per actual data source (gig platform API, UPI transaction
+volume, marketplace/client ratings, etc.) rather than one synthetic stand-in.
 """
 
 import numpy as np

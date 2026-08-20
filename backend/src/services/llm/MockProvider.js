@@ -1,23 +1,4 @@
-import { buildExplanationPrompt } from "./explanationPrompt.js";
-
-const FEATURE_LABELS = {
-  RevolvingUtilizationOfUnsecuredLines: "credit utilization",
-  age: "applicant age",
-  "NumberOfTime30-59DaysPastDueNotWorse": "recent late payments",
-  DebtRatio: "debt-to-income ratio",
-  MonthlyIncome: "monthly income",
-  NumberOfOpenCreditLinesAndLoans: "number of open credit lines",
-  NumberOfTimes90DaysLate: "severe late payments",
-  NumberRealEstateLoansOrLines: "real estate loans",
-  "NumberOfTime60-89DaysPastDueNotWorse": "moderate late payments",
-  NumberOfDependents: "number of dependents",
-  income_was_missing: "income data availability",
-  dependents_was_missing: "dependents data availability",
-  utility_payment_streak: "utility payment streak",
-  recharge_regularity_score: "mobile recharge regularity",
-  gig_trip_volume: "income activity volume",
-  gig_rating: "platform or client rating",
-};
+import { buildExplanationPrompt, FEATURE_LABELS } from "./explanationPrompt.js";
 
 /**
  * Deterministic, template-based provider used as the default so local dev

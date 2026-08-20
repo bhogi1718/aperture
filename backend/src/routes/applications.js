@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createApplicationSchema, applicantFeaturesSchema } from "../schemas/applicationSchema.js";
 import { stripProtectedAttributes } from "../guardrails/stripProtectedAttributes.js";
-import { scoreApplicant, counterfactual as runCounterfactual } from "../services/modelServiceClient.js";
+import { scoreApplicant, counterfactual as runCounterfactual, ModelServiceError } from "../services/modelServiceClient.js";
 import { getLLMProvider } from "../services/llm/index.js";
 import {
   insertApplication,
@@ -89,22 +89,42 @@ applicationsRouter.post("/counterfactual", async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("Counterfactual failed:", err);
+    if (err instanceof ModelServiceError && err.status === 400) {
+      return res.status(400).json({ error: "Invalid feature name" });
+    }
     res.status(502).json({ error: "Failed to compute counterfactual" });
   }
 });
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // Dashboard routes: reviewer auth required.
 applicationsRouter.get("/", requireAuth, async (req, res) => {
-  const limit = Math.min(Number(req.query.limit) || 50, 200);
-  const offset = Number(req.query.offset) || 0;
-  const applications = await listApplications({ limit, offset });
-  res.json({ applications });
+  const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
+  const offset = Math.max(Number(req.query.offset) || 0, 0);
+
+  try {
+    const applications = await listApplications({ limit, offset });
+    res.json({ applications });
+  } catch (err) {
+    console.error("Failed to list applications:", err);
+    res.status(500).json({ error: "Failed to list applications" });
+  }
 });
 
 applicationsRouter.get("/:id", requireAuth, async (req, res) => {
-  const application = await getApplicationById(req.params.id);
-  if (!application) {
-    return res.status(404).json({ error: "Application not found" });
+  if (!UUID_PATTERN.test(req.params.id)) {
+    return res.status(400).json({ error: "Invalid application id" });
   }
-  res.json(application);
+
+  try {
+    const application = await getApplicationById(req.params.id);
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+    res.json(application);
+  } catch (err) {
+    console.error("Failed to fetch application:", err);
+    res.status(500).json({ error: "Failed to fetch application" });
+  }
 });
