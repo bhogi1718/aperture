@@ -278,7 +278,7 @@ export function ApplicationForm() {
 
             <div className="field">
               <label className="field-label" htmlFor="recharge">
-                Mobile recharge regularity
+                Mobile recharge regularity <span className="mono">{form.rechargeRegularity}</span>
               </label>
               <input
                 id="recharge"
