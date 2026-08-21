@@ -11,4 +11,14 @@ export class MockEmailOtpProvider {
   async sendCode({ email, code }) {
     console.log(`[MockEmailOtpProvider] OTP for ${email}: ${code}`);
   }
+
+  async sendDecisionEmail({ email, riskTier }) {
+    console.log(`[MockEmailOtpProvider] Decision email for ${email}: ${riskTier}`);
+  }
+
+  async sendReviewerNotification({ applicationId, applicantName, applicantEmail, riskTier }) {
+    console.log(
+      `[MockEmailOtpProvider] Reviewer notification: ${applicantName} (${applicantEmail}) -- application ${applicationId} -- ${riskTier}`
+    );
+  }
 }

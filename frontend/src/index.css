@@ -482,3 +482,91 @@ textarea.input {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* ---------- Print (used for "Download PDF" via window.print) ---------- */
+@page {
+  size: A4;
+  margin: 16mm 14mm;
+}
+
+@media print {
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  html,
+  body {
+    width: auto;
+    background: #fff;
+    background-image: none;
+    color: #10151f;
+  }
+
+  /* The screen layout is 1280px wide (main.page's max-width); printing
+     that as-is means Chromium's PDF engine either scales the whole layout
+     down to fit the page (clipping the right edge if the scale/margins
+     don't line up exactly) or clips it outright. Forcing the content to
+     the printable page's own width -- not the screen viewport's -- makes
+     it reflow correctly instead of being shrunk. */
+  .page {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Grids (e.g. explanation + submitted-features side-by-side) don't
+     paginate well -- a tall second column strands blank space next to a
+     short first column, or vice versa. Stack to one column so content
+     flows continuously down the page instead. */
+  .page > div[style*='grid-template-columns'] {
+    display: block !important;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #d5dbe3;
+    box-shadow: none;
+    backdrop-filter: none;
+    color: #10151f;
+    break-inside: avoid;
+    margin-bottom: 16px;
+  }
+
+  /* A card taller than one page (e.g. a long submitted-features table)
+     can never satisfy break-inside: avoid -- forcing it anyway strands
+     the entire card on its own page and leaves the page before it mostly
+     blank. Let only genuinely long cards break internally. */
+  .card:has(table) {
+    break-inside: auto;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  td {
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  .text-muted,
+  .label-caps {
+    color: #4a5568 !important;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}

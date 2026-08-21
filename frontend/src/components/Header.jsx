@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export function Header({ right }) {
   return (
-    <header className="app-header">
+    <header className="app-header" data-print-hide>
       <div className="page app-header-inner">
         <Link to="/" className="app-header-brand">
           <span className="app-header-mark" aria-hidden="true">◍</span>

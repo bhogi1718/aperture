@@ -14,20 +14,20 @@ export function VerifyEmail() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState('details'); // 'details' | 'code' | 'history'
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [devCode, setDevCode] = useState(null);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [history, setHistory] = useState(null);
+  const [welcomeName, setWelcomeName] = useState('');
 
   async function handleRequestOtp(e) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      const result = await requestOtp({ email, name });
+      const result = await requestOtp({ email });
       setDevCode(result.devCode ?? null);
       setStep('code');
     } catch (err) {
@@ -42,10 +42,11 @@ export function VerifyEmail() {
     setError(null);
     setSubmitting(true);
     try {
-      const result = await verifyOtp({ email, name, code });
+      const result = await verifyOtp({ email, code });
       signIn(result.token, result.applicant);
 
       if (result.isReturning && result.applications.length > 0) {
+        setWelcomeName(result.applicant.name);
         setHistory(result.applications);
         setStep('history');
       } else {
@@ -77,18 +78,6 @@ export function VerifyEmail() {
             )}
 
             <form onSubmit={handleRequestOtp}>
-              <div className="field">
-                <label className="field-label" htmlFor="name">Your name</label>
-                <input
-                  id="name"
-                  className="input"
-                  type="text"
-                  placeholder="e.g. Priya Sharma"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
               <div className="field">
                 <label className="field-label" htmlFor="email">Email address</label>
                 <input
@@ -160,7 +149,7 @@ export function VerifyEmail() {
 
         {step === 'history' && history && (
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>Welcome back, {name}</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>Welcome back, {welcomeName}</h1>
             <p className="text-muted" style={{ marginTop: 0, marginBottom: 'var(--space-lg)' }}>
               Here's what we have on file for this email.
             </p>
@@ -177,12 +166,23 @@ export function VerifyEmail() {
                 <tbody>
                   {history.map((app) => (
                     <tr key={app.id} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
-                      <td style={{ padding: 'var(--space-md)', fontSize: 14 }}>{formatDate(app.created_at)}</td>
-                      <td style={{ padding: 'var(--space-md)' }}>
-                        <RiskBadge tier={app.risk_tier} />
+                      <td style={{ padding: 0 }}>
+                        <Link
+                          to={`/applications/${app.id}`}
+                          style={{ display: 'block', padding: 'var(--space-md)', fontSize: 14, textDecoration: 'none', color: 'inherit' }}
+                        >
+                          {formatDate(app.created_at)}
+                        </Link>
                       </td>
-                      <td style={{ padding: 'var(--space-md)' }} className="mono">
-                        {(app.probability_of_default * 100).toFixed(1)}%
+                      <td style={{ padding: 0 }}>
+                        <Link to={`/applications/${app.id}`} style={{ display: 'block', padding: 'var(--space-md)', textDecoration: 'none' }}>
+                          <RiskBadge tier={app.risk_tier} />
+                        </Link>
+                      </td>
+                      <td style={{ padding: 0 }} className="mono">
+                        <Link to={`/applications/${app.id}`} style={{ display: 'block', padding: 'var(--space-md)', textDecoration: 'none', color: 'inherit' }}>
+                          {(app.probability_of_default * 100).toFixed(1)}%
+                        </Link>
                       </td>
                     </tr>
                   ))}

@@ -10,9 +10,9 @@ import {
   createOtpCode,
   verifyOtpCode,
   findApplicantByEmail,
-  createApplicantAccount,
   touchApplicantLogin,
   listApplicationsForApplicant,
+  getApplicationForApplicant,
 } from "../db/applicantAccountsRepository.js";
 import { requireApplicantAuth } from "../middleware/requireApplicantAuth.js";
 
@@ -20,7 +20,6 @@ export const applicantAuthRouter = Router();
 
 export const requestOtpSchema = z.object({
   email: z.string().trim().toLowerCase().email("Enter a valid email address"),
-  name: z.string().trim().min(1).max(100),
 });
 
 // Per-email cooldown (canRequestOtp) stops rapid resends to one address, but
@@ -40,7 +39,7 @@ applicantAuthRouter.post("/request-otp", requestOtpLimiter, async (req, res) => 
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
   }
-  const { email, name } = parsed.data;
+  const { email } = parsed.data;
 
   try {
     const allowed = await canRequestOtp(email);
@@ -51,8 +50,6 @@ applicantAuthRouter.post("/request-otp", requestOtpLimiter, async (req, res) => 
     const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
     const { expires_at } = await createOtpCode(email, code);
 
-    // The name isn't persisted until verification succeeds (createApplicantAccount),
-    // so a re-request just needs the email; name is re-validated at verify time.
     const otp = getEmailOtpProvider();
     await otp.sendCode({ email, code });
 
@@ -69,16 +66,21 @@ applicantAuthRouter.post("/request-otp", requestOtpLimiter, async (req, res) => 
 
 export const verifyOtpSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
-  name: z.string().trim().min(1).max(100),
   code: z.string().regex(/^\d{6}$/, "Code must be 6 digits"),
 });
 
+// Verifying the code proves the applicant owns this email -- that's the
+// whole identity check. No applicant_accounts row is created here: an
+// account only needs to exist once someone actually submits an
+// application (see routes/applications.js), so a returning applicant with
+// no name change and a first-time visitor who abandons before applying
+// both go through the exact same, name-free flow.
 applicantAuthRouter.post("/verify-otp", async (req, res) => {
   const parsed = verifyOtpSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
   }
-  const { email, name, code } = parsed.data;
+  const { email, code } = parsed.data;
 
   try {
     const result = await verifyOtpCode(email, code);
@@ -95,15 +97,16 @@ applicantAuthRouter.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ error: "Incorrect code" });
     }
 
-    let applicant = await findApplicantByEmail(email);
+    const applicant = await findApplicantByEmail(email);
     const isReturning = Boolean(applicant);
-    if (!applicant) {
-      applicant = await createApplicantAccount(email, name);
-    } else {
+    if (applicant) {
       await touchApplicantLogin(applicant.id);
     }
 
-    const token = jwt.sign({ sub: applicant.id, email: applicant.email, role: "applicant" }, env.applicantJwtSecret, {
+    // sub is the account id once one exists, or null for a first-time
+    // applicant who hasn't submitted anything yet -- routes down the line
+    // key off email (always present) and treat sub as informational.
+    const token = jwt.sign({ sub: applicant?.id ?? null, email, role: "applicant" }, env.applicantJwtSecret, {
       expiresIn: "24h",
     });
 
@@ -111,7 +114,7 @@ applicantAuthRouter.post("/verify-otp", async (req, res) => {
 
     res.json({
       token,
-      applicant: { id: applicant.id, name: applicant.name, email: applicant.email },
+      applicant: { id: applicant?.id ?? null, name: applicant?.name ?? null, email },
       isReturning,
       applications,
     });
@@ -123,10 +126,39 @@ applicantAuthRouter.post("/verify-otp", async (req, res) => {
 
 applicantAuthRouter.get("/me/applications", requireApplicantAuth, async (req, res) => {
   try {
-    const applications = await listApplicationsForApplicant(req.applicant.sub);
+    const applicant = await findApplicantByEmail(req.applicant.email);
+    const applications = applicant ? await listApplicationsForApplicant(applicant.id) : [];
     res.json({ applications });
   } catch (err) {
     console.error("Failed to list applicant's applications:", err);
     res.status(500).json({ error: "Failed to load applications" });
+  }
+});
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Lets a returning applicant reopen one of their own past applications
+// from the history table (see VerifyEmail.jsx) -- same detail shown right
+// after submission, fetched again by id instead of relying on in-memory
+// router state, which doesn't survive a page reload or a new session.
+applicantAuthRouter.get("/me/applications/:id", requireApplicantAuth, async (req, res) => {
+  if (!UUID_PATTERN.test(req.params.id)) {
+    return res.status(400).json({ error: "Invalid application id" });
+  }
+
+  try {
+    const applicant = await findApplicantByEmail(req.applicant.email);
+    if (!applicant) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    const application = await getApplicationForApplicant(applicant.id, req.params.id);
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+    res.json(application);
+  } catch (err) {
+    console.error("Failed to fetch applicant's application:", err);
+    res.status(500).json({ error: "Failed to load application" });
   }
 });

@@ -19,7 +19,18 @@ const HIGHLIGHTS = [
 export function Landing() {
   return (
     <>
-      <Header right={<Link to="/reviewer/login" className="text-muted" style={{ fontSize: 14, textDecoration: 'none' }}>Reviewer sign in</Link>} />
+      <Header
+        right={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+            <Link to="/verify" className="text-muted" style={{ fontSize: 14, textDecoration: 'none' }}>
+              Existing customer? Log in
+            </Link>
+            <Link to="/reviewer/login" className="text-muted" style={{ fontSize: 14, textDecoration: 'none' }}>
+              Reviewer sign in
+            </Link>
+          </div>
+        }
+      />
       <main className="page-narrow" style={{ paddingTop: 'var(--space-3xl)', paddingBottom: 'var(--space-3xl)' }}>
         <div style={{ textAlign: 'center' }}>
           <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 'var(--space-md)' }}>

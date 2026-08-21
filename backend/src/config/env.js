@@ -31,4 +31,9 @@ export const env = {
   smtpUser: process.env.SMTP_USER ?? "",
   smtpPassword: process.env.SMTP_PASSWORD ?? "",
   smtpFromAddress: process.env.SMTP_FROM_ADDRESS ?? "",
+
+  // Where new-application alerts are sent. Empty disables the notification
+  // (checked at send time, not required() -- a hackathon reviewer inbox
+  // isn't a hard dependency for the app to run).
+  reviewerNotificationEmail: process.env.REVIEWER_NOTIFICATION_EMAIL ?? "",
 };

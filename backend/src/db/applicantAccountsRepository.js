@@ -95,3 +95,21 @@ export async function listApplicationsForApplicant(applicantId) {
   );
   return rows;
 }
+
+/**
+ * Fetches one of an applicant's own past applications in full (same
+ * detail shown right after submission). Scoped to applicant_id in the
+ * query itself, not just checked after the fact, so one applicant can
+ * never fetch another's application by guessing an id. Excludes
+ * fraud_flags and reviewer_decision fields -- those are reviewer-internal,
+ * not shown to the applicant themself.
+ */
+export async function getApplicationForApplicant(applicantId, applicationId) {
+  const { rows } = await pool.query(
+    `SELECT id, created_at, probability_of_default, risk_tier, explanation, top_contributing_features
+     FROM applications
+     WHERE id = $1 AND applicant_id = $2`,
+    [applicationId, applicantId]
+  );
+  return rows[0] ?? null;
+}

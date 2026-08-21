@@ -18,6 +18,7 @@ export default function App() {
           <Route path="/verify" element={<VerifyEmail />} />
           <Route path="/apply" element={<ApplicationForm />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/applications/:id" element={<Results />} />
           <Route path="/reviewer/login" element={<ReviewerLogin />} />
           <Route path="/reviewer/dashboard" element={<ReviewerDashboard />} />
           <Route path="/reviewer/applications/:id" element={<ApplicationDetail />} />

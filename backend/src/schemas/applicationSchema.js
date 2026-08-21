@@ -22,4 +22,12 @@ export const applicantFeaturesSchema = z.object({
 export const createApplicationSchema = z.object({
   applicant: applicantFeaturesSchema,
   transactionNarrative: z.string().max(2000).optional(),
+  // Required only for a first-time applicant (no existing account for
+  // their verified email yet) -- enforced in the route, since a returning
+  // applicant's name is already on file and shouldn't need re-entering.
+  applicantName: z.string().trim().min(1).max(100).optional(),
+});
+
+export const reviewerDecisionSchema = z.object({
+  decision: z.enum(["Approved", "Rejected"]),
 });

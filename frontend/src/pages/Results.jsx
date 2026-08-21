@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Link, useLocation, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useParams, Navigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { RiskBadge } from '../components/RiskBadge';
 import { FeatureBar } from '../components/FeatureBar';
 import { featureLabel } from '../lib/featureLabels';
-import { runCounterfactual } from '../api/client';
+import { useApplicantAuth } from '../context/ApplicantAuthContext';
+import { runCounterfactual, getMyApplication } from '../api/client';
 
 const TIER_COPY = {
   Approve: { icon: '✓', message: 'Your application looks strong.' },
@@ -109,9 +110,108 @@ function CounterfactualExplorer({ applicant }) {
   );
 }
 
+/**
+ * A past application, reopened from the "Welcome back" history table
+ * (VerifyEmail.jsx). Fetched by id rather than passed via router state,
+ * since state doesn't survive a reload or a brand-new session -- a
+ * returning applicant re-verifying days later has none. The applicant-
+ * scoped detail endpoint intentionally omits the raw feature payload and
+ * cohort data (neither is meaningful to recompute after the fact), so
+ * this view skips the counterfactual explorer and cohort card that a
+ * fresh submission's Results view shows.
+ */
+function PastApplicationView({ id }) {
+  const { token, isVerified } = useApplicantAuth();
+  const [application, setApplication] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!token || !id) return;
+    getMyApplication({ token, id })
+      .then(setApplication)
+      .catch((err) => setError(err.message));
+  }, [token, id]);
+
+  if (!isVerified) {
+    return <Navigate to="/verify" replace />;
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <main className="page-narrow" style={{ paddingTop: 'var(--space-xl)' }}>
+          <div className="card" style={{ borderColor: 'var(--color-reject)', background: 'var(--color-reject-soft)' }}>
+            <p style={{ color: 'var(--color-reject)', margin: 0 }}>{error}</p>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  if (!application) {
+    return (
+      <>
+        <Header />
+        <main className="page-narrow" style={{ paddingTop: 'var(--space-xl)' }}>
+          <p className="text-muted">Loading…</p>
+        </main>
+      </>
+    );
+  }
+
+  const tierInfo = TIER_COPY[application.risk_tier] ?? TIER_COPY['Manual Review'];
+  const maxAbsValue = Math.max(...application.top_contributing_features.map((f) => Math.abs(f.shap_value)), 0.001);
+
+  return (
+    <>
+      <Header />
+      <main className="page" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+        <Link to="/verify" className="text-muted" data-print-hide style={{ fontSize: 14, textDecoration: 'none', display: 'inline-block', marginBottom: 'var(--space-md)' }}>
+          ← Back to your applications
+        </Link>
+
+        <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+            <span style={{ fontSize: 28 }} aria-hidden="true">{tierInfo.icon}</span>
+            <div>
+              <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
+                <RiskBadge tier={application.risk_tier} />
+              </h1>
+              <p className="text-muted mono" style={{ margin: 0, fontSize: 14 }}>
+                Estimated risk: {(application.probability_of_default * 100).toFixed(1)}%
+              </p>
+            </div>
+          </div>
+          <p className="text-muted" style={{ margin: 0, maxWidth: 320, fontSize: 14 }}>{tierInfo.message}</p>
+          <button type="button" className="btn btn-secondary" data-print-hide onClick={() => window.print()}>
+            ↓ Download PDF
+          </button>
+        </div>
+
+        <div className="card">
+          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 'var(--space-md)' }}>Why this decision</h2>
+          <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)' }}>
+            {application.explanation}
+          </p>
+          <h3 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>Top contributing factors</h3>
+          {application.top_contributing_features.map((f) => (
+            <FeatureBar key={f.feature} feature={f.feature} shapValue={f.shap_value} maxAbsValue={maxAbsValue} />
+          ))}
+        </div>
+      </main>
+    </>
+  );
+}
+
 export function Results() {
   const location = useLocation();
+  const { id } = useParams();
   const { result, applicant } = location.state ?? {};
+
+  if (id) {
+    return <PastApplicationView id={id} />;
+  }
 
   if (!result || !applicant) {
     return <Navigate to="/apply" replace />;
@@ -137,6 +237,14 @@ export function Results() {
             </div>
           </div>
           <p className="text-muted" style={{ margin: 0, maxWidth: 320, fontSize: 14 }}>{tierInfo.message}</p>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            data-print-hide
+            onClick={() => window.print()}
+          >
+            ↓ Download PDF
+          </button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
@@ -152,7 +260,9 @@ export function Results() {
               ))}
             </div>
 
-            <CounterfactualExplorer applicant={applicant} />
+            <div data-print-hide>
+              <CounterfactualExplorer applicant={applicant} />
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', minWidth: 0 }}>
@@ -179,7 +289,7 @@ export function Results() {
               )}
             </div>
 
-            <Link to="/apply" className="btn btn-secondary btn-block" style={{ textDecoration: 'none' }}>
+            <Link to="/apply" className="btn btn-secondary btn-block" data-print-hide style={{ textDecoration: 'none' }}>
               Apply again
             </Link>
           </div>

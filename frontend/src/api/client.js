@@ -20,30 +20,34 @@ async function request(path, { method = 'GET', body, token } = {}) {
   return data;
 }
 
-export function submitApplication({ applicant, transactionNarrative, token }) {
+export function submitApplication({ applicant, transactionNarrative, applicantName, token }) {
   return request('/api/applications', {
     method: 'POST',
-    body: { applicant, transactionNarrative },
+    body: { applicant, transactionNarrative, applicantName },
     token,
   });
 }
 
-export function requestOtp({ email, name }) {
+export function requestOtp({ email }) {
   return request('/api/applicant-auth/request-otp', {
     method: 'POST',
-    body: { email, name },
+    body: { email },
   });
 }
 
-export function verifyOtp({ email, name, code }) {
+export function verifyOtp({ email, code }) {
   return request('/api/applicant-auth/verify-otp', {
     method: 'POST',
-    body: { email, name, code },
+    body: { email, code },
   });
 }
 
 export function getMyApplications({ token }) {
   return request('/api/applicant-auth/me/applications', { token });
+}
+
+export function getMyApplication({ token, id }) {
+  return request(`/api/applicant-auth/me/applications/${id}`, { token });
 }
 
 export function runCounterfactual({ applicant, featureToPerturb, newValue }) {
@@ -66,4 +70,12 @@ export function listApplications({ token, limit = 50, offset = 0 }) {
 
 export function getApplication({ token, id }) {
   return request(`/api/applications/${id}`, { token });
+}
+
+export function decideApplication({ token, id, decision }) {
+  return request(`/api/applications/${id}/decision`, {
+    method: 'PATCH',
+    body: { decision },
+    token,
+  });
 }

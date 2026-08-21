@@ -5,7 +5,8 @@ import { useApplicantAuth } from '../context/ApplicantAuthContext';
 import { submitApplication } from '../api/client';
 
 const initialState = {
-  age: '',
+  name: '',
+  dateOfBirth: '',
   dependents: '',
   monthlyIncome: '',
   monthlyDebtPayments: '',
@@ -22,6 +23,20 @@ const initialState = {
   narrative: '',
 };
 
+function calculateAge(dateOfBirth) {
+  if (!dateOfBirth) return null;
+  const dob = new Date(dateOfBirth);
+  if (Number.isNaN(dob.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const hasHadBirthdayThisYear =
+    today.getMonth() > dob.getMonth() ||
+    (today.getMonth() === dob.getMonth() && today.getDate() >= dob.getDate());
+  if (!hasHadBirthdayThisYear) age -= 1;
+  return age;
+}
+
 function toApplicantPayload(form) {
   const income = form.monthlyIncome === '' ? null : Number(form.monthlyIncome);
   const debtPayments = form.monthlyDebtPayments === '' ? 0 : Number(form.monthlyDebtPayments);
@@ -34,7 +49,7 @@ function toApplicantPayload(form) {
 
   return {
     RevolvingUtilizationOfUnsecuredLines: Number(form.creditUtilizationPercent) / 100,
-    age: Number(form.age),
+    age: calculateAge(form.dateOfBirth),
     'NumberOfTime30-59DaysPastDueNotWorse': Number(form.latePayments3059),
     DebtRatio: debtRatio,
     MonthlyIncome: income ?? 0,
@@ -79,8 +94,11 @@ function Stepper({ label, value, onChange, max = 20 }) {
   );
 }
 
+const MIN_AGE = 18;
+const MAX_AGE = 110;
+
 export function ApplicationForm() {
-  const { isVerified, token } = useApplicantAuth();
+  const { isVerified, token, applicant: account } = useApplicantAuth();
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -90,6 +108,8 @@ export function ApplicationForm() {
     return <Navigate to="/verify" replace />;
   }
 
+  const needsName = !account?.name;
+
   function set(field) {
     return (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
   }
@@ -98,8 +118,18 @@ export function ApplicationForm() {
     e.preventDefault();
     setError(null);
 
-    if (!form.age) {
-      setError('Age is required.');
+    if (needsName && !form.name.trim()) {
+      setError('Your name is required.');
+      return;
+    }
+
+    const age = calculateAge(form.dateOfBirth);
+    if (age === null) {
+      setError('Date of birth is required.');
+      return;
+    }
+    if (age < MIN_AGE || age > MAX_AGE) {
+      setError(`Age must be between ${MIN_AGE} and ${MAX_AGE}.`);
       return;
     }
 
@@ -109,6 +139,7 @@ export function ApplicationForm() {
       const result = await submitApplication({
         applicant,
         transactionNarrative: form.narrative || undefined,
+        applicantName: needsName ? form.name.trim() : undefined,
         token,
       });
       navigate('/results', { state: { result, applicant } });
@@ -132,17 +163,34 @@ export function ApplicationForm() {
         <form onSubmit={handleSubmit}>
           <section className="card" style={{ marginBottom: 'var(--space-lg)' }}>
             <h2 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>About you</h2>
+            {needsName && (
+              <div className="field">
+                <label className="field-label" htmlFor="name">Your name</label>
+                <input
+                  id="name"
+                  className="input"
+                  type="text"
+                  placeholder="e.g. Priya Sharma"
+                  value={form.name}
+                  onChange={set('name')}
+                  required
+                />
+              </div>
+            )}
             <div className="field">
-              <label className="field-label" htmlFor="age">Age</label>
+              <label className="field-label" htmlFor="dob">
+                Date of birth
+                {form.dateOfBirth && calculateAge(form.dateOfBirth) !== null && (
+                  <span className="mono"> ({calculateAge(form.dateOfBirth)} yrs)</span>
+                )}
+              </label>
               <input
-                id="age"
+                id="dob"
                 className="input"
-                type="number"
-                min={18}
-                max={110}
-                placeholder="e.g. 34"
-                value={form.age}
-                onChange={set('age')}
+                type="date"
+                max={new Date().toISOString().slice(0, 10)}
+                value={form.dateOfBirth}
+                onChange={set('dateOfBirth')}
                 required
               />
             </div>

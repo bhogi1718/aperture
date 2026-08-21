@@ -4,6 +4,7 @@ import { Header } from '../components/Header';
 import { RiskBadge } from '../components/RiskBadge';
 import { useAuth } from '../context/AuthContext';
 import { listApplications } from '../api/client';
+import { FRAUD_FLAG_LABELS } from '../lib/fraudFlagLabels';
 
 function formatDate(iso) {
   return new Date(iso).toLocaleString(undefined, {
@@ -11,11 +12,6 @@ function formatDate(iso) {
     timeStyle: 'short',
   });
 }
-
-const FRAUD_FLAG_LABELS = {
-  implausible_activity_no_footprint: 'High claimed activity, no other financial footprint',
-  duplicate_narrative_recent: 'Duplicate narrative submitted recently',
-};
 
 function FraudFlags({ flags }) {
   if (!flags || flags.length === 0) {
@@ -27,6 +23,20 @@ function FraudFlags({ flags }) {
       title={flags.map((f) => FRAUD_FLAG_LABELS[f] ?? f).join('; ')}
     >
       {flags.length} flag{flags.length > 1 ? 's' : ''}
+    </span>
+  );
+}
+
+function DecisionStatus({ app }) {
+  if (app.risk_tier !== 'Manual Review') {
+    return <span className="text-muted" style={{ fontSize: 13 }}>—</span>;
+  }
+  if (!app.reviewer_decision) {
+    return <span className="badge badge-review">Pending decision</span>;
+  }
+  return (
+    <span className={`badge ${app.reviewer_decision === 'Approved' ? 'badge-approve' : 'badge-reject'}`}>
+      {app.reviewer_decision}
     </span>
   );
 }
@@ -86,6 +96,7 @@ export function ReviewerDashboard() {
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Risk tier</th>
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Default probability</th>
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Flags</th>
+                  <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -105,6 +116,9 @@ export function ReviewerDashboard() {
                     </td>
                     <td style={{ padding: 'var(--space-md)' }}>
                       <FraudFlags flags={app.fraud_flags} />
+                    </td>
+                    <td style={{ padding: 'var(--space-md)' }}>
+                      <DecisionStatus app={app} />
                     </td>
                   </tr>
                 ))}

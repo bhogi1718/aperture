@@ -4,13 +4,71 @@ import { Header } from '../components/Header';
 import { RiskBadge } from '../components/RiskBadge';
 import { FeatureBar } from '../components/FeatureBar';
 import { featureLabel } from '../lib/featureLabels';
+import { FRAUD_FLAG_LABELS } from '../lib/fraudFlagLabels';
 import { useAuth } from '../context/AuthContext';
-import { getApplication } from '../api/client';
+import { getApplication, decideApplication } from '../api/client';
 
-const FRAUD_FLAG_LABELS = {
-  implausible_activity_no_footprint: 'High claimed activity volume with no other financial footprint (utility payments or recharge regularity).',
-  duplicate_narrative_recent: 'This narrative text matches another application submitted in the last hour.',
-};
+function ReviewerDecisionPanel({ application, token, onDecided }) {
+  const [submitting, setSubmitting] = useState(null); // null | 'Approved' | 'Rejected'
+  const [error, setError] = useState(null);
+
+  if (application.risk_tier !== 'Manual Review') return null;
+
+  if (application.reviewer_decision) {
+    return (
+      <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
+        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Reviewer decision</h2>
+        <p style={{ margin: 0, fontSize: 14 }}>
+          <strong>{application.reviewer_decision}</strong> by {application.reviewer_username} on{' '}
+          {new Date(application.reviewer_decided_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+        </p>
+      </div>
+    );
+  }
+
+  async function handleDecide(decision) {
+    setSubmitting(decision);
+    setError(null);
+    try {
+      const updated = await decideApplication({ token, id: application.id, decision });
+      onDecided(updated);
+    } catch (err) {
+      setError(err.message || 'Could not record decision.');
+    } finally {
+      setSubmitting(null);
+    }
+  }
+
+  return (
+    <div className="card" data-print-hide style={{ marginBottom: 'var(--space-lg)' }}>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>This application needs a decision</h2>
+      <p className="text-muted" style={{ fontSize: 14, marginTop: 0, marginBottom: 'var(--space-md)' }}>
+        The model couldn't confidently approve or reject this application. Review the explanation
+        and factors below, then record a decision.
+      </p>
+      {error && <p className="field-error" style={{ marginBottom: 'var(--space-md)' }}>{error}</p>}
+      <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={submitting !== null}
+          onClick={() => handleDecide('Approved')}
+        >
+          {submitting === 'Approved' ? 'Approving…' : '✓ Approve'}
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          style={{ borderColor: 'var(--color-reject)', color: 'var(--color-reject)' }}
+          disabled={submitting !== null}
+          onClick={() => handleDecide('Rejected')}
+        >
+          {submitting === 'Rejected' ? 'Rejecting…' : '✕ Reject'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function ApplicationDetail() {
   const { isAuthenticated, token } = useAuth();
@@ -33,7 +91,12 @@ export function ApplicationDetail() {
     <>
       <Header />
       <main className="page" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-        <Link to="/reviewer/dashboard" className="text-muted" style={{ fontSize: 14, textDecoration: 'none', display: 'inline-block', marginBottom: 'var(--space-md)' }}>
+        <Link
+          to="/reviewer/dashboard"
+          className="text-muted"
+          data-print-hide
+          style={{ fontSize: 14, textDecoration: 'none', display: 'inline-block', marginBottom: 'var(--space-md)' }}
+        >
           ← Back to applications
         </Link>
 
@@ -52,10 +115,26 @@ export function ApplicationDetail() {
                 <p className="mono text-muted" style={{ margin: 0, fontSize: 13, marginBottom: 4 }}>{application.id}</p>
                 <RiskBadge tier={application.risk_tier} />
               </div>
-              <p className="mono" style={{ margin: 0, fontSize: 15 }}>
-                {(application.probability_of_default * 100).toFixed(1)}% estimated risk
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                <p className="mono" style={{ margin: 0, fontSize: 15 }}>
+                  {(application.probability_of_default * 100).toFixed(1)}% estimated risk
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  data-print-hide
+                  onClick={() => window.print()}
+                >
+                  ↓ Download PDF
+                </button>
+              </div>
             </div>
+
+            <ReviewerDecisionPanel
+              application={application}
+              token={token}
+              onDecided={(updated) => setApplication((prev) => ({ ...prev, ...updated }))}
+            />
 
             {application.fraud_flags?.length > 0 && (
               <div className="card" style={{ borderColor: 'var(--color-reject)', background: 'var(--color-reject-soft)', marginBottom: 'var(--space-lg)' }}>
