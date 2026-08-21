@@ -1,0 +1,10 @@
+{
+  "roc_auc": 0.9127451954147494,
+  "average_precision": 0.5480861480781427,
+  "best_f1": 0.5378640771702593,
+  "best_f1_threshold": 0.8196939826011658,
+  "best_f1_precision": 0.5238770685579196,
+  "best_f1_recall": 0.5526184538653367,
+  "validation_rows": 30000,
+  "validation_positive_rate": 0.06683333333333333
+}

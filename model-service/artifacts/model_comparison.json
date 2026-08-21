@@ -1,0 +1,52 @@
+[
+  {
+    "name": "LightGBM",
+    "best_params": {
+      "colsample_bytree": 0.8,
+      "learning_rate": 0.05,
+      "max_depth": 4,
+      "n_estimators": 300,
+      "subsample": 0.8
+    },
+    "cv_average_precision_mean": 0.5455378517428195,
+    "cv_roc_auc_mean": 0.9097280857998206,
+    "cv_roc_auc_std": 0.0010024422428561348,
+    "elapsed_seconds": 208.2
+  },
+  {
+    "name": "XGBoost (current production model)",
+    "best_params": {
+      "colsample_bytree": 0.8,
+      "learning_rate": 0.03,
+      "max_depth": 4,
+      "n_estimators": 500,
+      "subsample": 0.8
+    },
+    "cv_average_precision_mean": 0.5452507830136799,
+    "cv_roc_auc_mean": 0.9103276277355314,
+    "cv_roc_auc_std": 0.001029008624243783,
+    "elapsed_seconds": 136.6
+  },
+  {
+    "name": "Random Forest",
+    "best_params": {
+      "max_depth": null,
+      "min_samples_leaf": 5,
+      "n_estimators": 400
+    },
+    "cv_average_precision_mean": 0.5282586306618858,
+    "cv_roc_auc_mean": 0.9055326518981051,
+    "cv_roc_auc_std": 0.001661396790952749,
+    "elapsed_seconds": 484.0
+  },
+  {
+    "name": "Logistic Regression (baseline)",
+    "best_params": {
+      "model__C": 10.0
+    },
+    "cv_average_precision_mean": 0.46093614280214457,
+    "cv_roc_auc_mean": 0.8822693261532972,
+    "cv_roc_auc_std": 0.0017607427042802561,
+    "elapsed_seconds": 6.1
+  }
+]

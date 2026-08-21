@@ -11,15 +11,16 @@ venv/
 .env.*
 !.env.example
 
-# Data (large / regeneratable, not committed)
+# Data (Kaggle dataset -- redistribution isn't permitted by its license,
+# see README's "Getting the dataset" section for how to obtain it)
 data/raw/
 data/processed/
 *.csv
 
-# Model artifacts
-model-service/artifacts/
+# Model artifacts: intentionally NOT ignored. model-service/artifacts/ is
+# committed so the app runs immediately after a fresh clone without
+# requiring the Kaggle dataset or a training run first -- see README.
 *.pkl
-*.joblib
 *.onnx
 
 # Build output

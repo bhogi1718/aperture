@@ -1,0 +1,18 @@
+[
+  "RevolvingUtilizationOfUnsecuredLines",
+  "age",
+  "NumberOfTime30-59DaysPastDueNotWorse",
+  "DebtRatio",
+  "MonthlyIncome",
+  "NumberOfOpenCreditLinesAndLoans",
+  "NumberOfTimes90DaysLate",
+  "NumberRealEstateLoansOrLines",
+  "NumberOfTime60-89DaysPastDueNotWorse",
+  "NumberOfDependents",
+  "income_was_missing",
+  "dependents_was_missing",
+  "utility_payment_streak",
+  "recharge_regularity_score",
+  "gig_trip_volume",
+  "gig_rating"
+]
