@@ -9,6 +9,20 @@
  * velocity limits, anomaly detection) -- a defensible starting signal for
  * a prototype's timeline, addressing the "mitigating fraud" requirement
  * with something real rather than leaving it unaddressed.
+ *
+ * Both checks here only pattern-match on applicant-reported data -- neither
+ * verifies anything against an external source. A production version's
+ * highest-value addition would be PAN-based identity verification (via a
+ * licensed credit bureau API -- CIBIL/Experian/Equifax/CRIF High Mark -- or
+ * a KYC provider such as Karza/Signzy) to confirm the applicant is a real,
+ * uniquely identified person before scoring, and to cross-check self-
+ * reported income/activity against any existing bureau record. Deliberately
+ * NOT built here: it requires a licensed lender/NBFC relationship or a
+ * formal bureau partnership plus KYC-compliant consent capture, none of
+ * which a hackathon prototype can obtain -- and for the specific NTC/
+ * thin-file population this project targets, a bureau lookup would often
+ * return little or nothing anyway, which is the whole reason alternative
+ * data matters here in the first place.
  */
 
 const HIGH_ACTIVITY_THRESHOLD = 200; // gig_trip_volume
