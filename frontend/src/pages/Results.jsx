@@ -3,7 +3,7 @@ import { Link, useLocation, useParams, Navigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { RiskBadge } from '../components/RiskBadge';
 import { FeatureBar } from '../components/FeatureBar';
-import { featureLabel } from '../lib/featureLabels';
+import { featureLabel, formatFeatureValue, FEATURE_GROUPS } from '../lib/featureLabels';
 import { useApplicantAuth } from '../context/ApplicantAuthContext';
 import { runCounterfactual, getMyApplication } from '../api/client';
 
@@ -18,6 +18,71 @@ const COUNTERFACTUAL_FEATURES = [
   { key: 'recharge_regularity_score', min: 0, max: 100, step: 1 },
   { key: 'gig_rating', min: 1, max: 5, step: 0.1 },
 ].map((f) => ({ ...f, label: featureLabel(f.key) }));
+
+function ProfileFeatureSummary({ features, narrative }) {
+  if (!features) return null;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
+      {/* Alternative behavioral card */}
+      <div className="card" style={{ borderColor: 'var(--color-accent-soft)', background: 'var(--color-surface)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>Alternative Behavioral Footprint</h3>
+          <span className="badge badge-approve" style={{ fontSize: 11 }}>NTC Factors</span>
+        </div>
+        <p className="text-muted" style={{ fontSize: 12, marginTop: 0, marginBottom: 'var(--space-md)' }}>
+          Signals evaluated from regular payments and verified platform activity.
+        </p>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <tbody>
+            {FEATURE_GROUPS.alternative.keys.map((key) => {
+              const val = features[key];
+              if (val === undefined) return null;
+              return (
+                <tr key={key} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                  <td style={{ padding: '6px 0', color: 'var(--color-on-surface-variant)' }}>{featureLabel(key)}</td>
+                  <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600 }} className="mono">
+                    {formatFeatureValue(key, val)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Financial & Demographics card */}
+      <div className="card">
+        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 'var(--space-sm)' }}>Submitted Profile & Financial Summary</h3>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <tbody>
+            {FEATURE_GROUPS.profile.keys.concat(FEATURE_GROUPS.financial.keys).map((key) => {
+              const val = features[key];
+              if (val === undefined) return null;
+              return (
+                <tr key={key} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                  <td style={{ padding: '5px 0', color: 'var(--color-on-surface-variant)' }}>{featureLabel(key)}</td>
+                  <td style={{ padding: '5px 0', textAlign: 'right' }} className="mono">
+                    {formatFeatureValue(key, val)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {narrative && (
+        <div className="card">
+          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Income Narrative (Guardrail Redacted)</h3>
+          <p style={{ fontSize: 13, color: 'var(--color-on-surface-variant)', margin: 0, lineHeight: 1.5 }}>
+            {narrative}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function CounterfactualExplorer({ applicant }) {
   const [featureKey, setFeatureKey] = useState(COUNTERFACTUAL_FEATURES[0].key);
@@ -110,18 +175,8 @@ function CounterfactualExplorer({ applicant }) {
   );
 }
 
-/**
- * A past application, reopened from the "Welcome back" history table
- * (VerifyEmail.jsx). Fetched by id rather than passed via router state,
- * since state doesn't survive a reload or a brand-new session -- a
- * returning applicant re-verifying days later has none. The applicant-
- * scoped detail endpoint intentionally omits the raw feature payload and
- * cohort data (neither is meaningful to recompute after the fact), so
- * this view skips the counterfactual explorer and cohort card that a
- * fresh submission's Results view shows.
- */
 function PastApplicationView({ id }) {
-  const { token, isVerified } = useApplicantAuth();
+  const { token, isVerified, email } = useApplicantAuth();
   const [application, setApplication] = useState(null);
   const [error, setError] = useState(null);
 
@@ -171,33 +226,43 @@ function PastApplicationView({ id }) {
           ← Back to your applications
         </Link>
 
+        {/* Header summary banner */}
         <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
             <span style={{ fontSize: 28 }} aria-hidden="true">{tierInfo.icon}</span>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 4 }}>
                 <RiskBadge tier={application.risk_tier} />
-              </h1>
+                <span className="mono text-muted" style={{ fontSize: 12 }}>ID: {application.id?.slice(0, 8)}…</span>
+              </div>
               <p className="text-muted mono" style={{ margin: 0, fontSize: 14 }}>
-                Estimated risk: {(application.probability_of_default * 100).toFixed(1)}%
+                Estimated risk: {(application.probability_of_default * 100).toFixed(1)}% {email && `• Account: ${email}`}
               </p>
             </div>
           </div>
-          <p className="text-muted" style={{ margin: 0, maxWidth: 320, fontSize: 14 }}>{tierInfo.message}</p>
-          <button type="button" className="btn btn-secondary" data-print-hide onClick={() => window.print()}>
-            ↓ Download PDF
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+            <p className="text-muted" style={{ margin: 0, maxWidth: 300, fontSize: 14 }}>{tierInfo.message}</p>
+            <button type="button" className="btn btn-secondary" data-print-hide onClick={() => window.print()}>
+              ↓ Download PDF
+            </button>
+          </div>
         </div>
 
-        <div className="card">
-          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 'var(--space-md)' }}>Why this decision</h2>
-          <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)' }}>
-            {application.explanation}
-          </p>
-          <h3 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>Top contributing factors</h3>
-          {application.top_contributing_features.map((f) => (
-            <FeatureBar key={f.feature} feature={f.feature} shapValue={f.shap_value} maxAbsValue={maxAbsValue} />
-          ))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
+          <div className="card">
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 'var(--space-md)' }}>Why this decision</h2>
+            <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)' }}>
+              {application.explanation}
+            </p>
+            <h3 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>Top contributing factors (SHAP)</h3>
+            {application.top_contributing_features.map((f) => (
+              <FeatureBar key={f.feature} feature={f.feature} shapValue={f.shap_value} maxAbsValue={maxAbsValue} />
+            ))}
+          </div>
+
+          <div>
+            <ProfileFeatureSummary features={application.features} narrative={application.transaction_narrative} />
+          </div>
         </div>
       </main>
     </>
@@ -243,11 +308,11 @@ export function Results() {
             data-print-hide
             onClick={() => window.print()}
           >
-            ↓ Download PDF
+            ↓ Download PDF Report
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', minWidth: 0 }}>
             <div className="card">
               <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 'var(--space-md)' }}>Why this decision</h2>
@@ -263,6 +328,9 @@ export function Results() {
             <div data-print-hide>
               <CounterfactualExplorer applicant={applicant} />
             </div>
+
+            {/* Profile and Submitted Features Summary */}
+            <ProfileFeatureSummary features={applicant} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', minWidth: 0 }}>
@@ -298,3 +366,4 @@ export function Results() {
     </>
   );
 }
+

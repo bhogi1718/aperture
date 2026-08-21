@@ -91,6 +91,7 @@ export function ReviewerDashboard() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                  <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Applicant</th>
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Application ID</th>
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Submitted</th>
                   <th className="label-caps" style={{ textAlign: 'left', padding: 'var(--space-md)' }}>Risk tier</th>
@@ -102,6 +103,12 @@ export function ReviewerDashboard() {
               <tbody>
                 {applications.map((app) => (
                   <tr key={app.id} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                    <td style={{ padding: 'var(--space-md)' }}>
+                      <Link to={`/reviewer/applications/${app.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{app.applicant_name || 'Anonymous Applicant'}</div>
+                        <div className="text-muted" style={{ fontSize: 12 }}>{app.applicant_email || 'No email attached'}</div>
+                      </Link>
+                    </td>
                     <td style={{ padding: 'var(--space-md)' }}>
                       <Link to={`/reviewer/applications/${app.id}`} className="mono" style={{ fontSize: 13, textDecoration: 'none', color: 'var(--color-accent)' }}>
                         {app.id.slice(0, 8)}…

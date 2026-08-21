@@ -106,7 +106,7 @@ export async function listApplicationsForApplicant(applicantId) {
  */
 export async function getApplicationForApplicant(applicantId, applicationId) {
   const { rows } = await pool.query(
-    `SELECT id, created_at, probability_of_default, risk_tier, explanation, top_contributing_features
+    `SELECT id, created_at, probability_of_default, risk_tier, explanation, top_contributing_features, features, transaction_narrative
      FROM applications
      WHERE id = $1 AND applicant_id = $2`,
     [applicationId, applicantId]

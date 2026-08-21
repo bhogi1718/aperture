@@ -79,9 +79,11 @@ export async function findSimilarApplications(applicationId, limit = 5) {
 
 export async function listApplications({ limit = 50, offset = 0 } = {}) {
   const { rows } = await pool.query(
-    `SELECT id, created_at, risk_tier, probability_of_default, explanation, fraud_flags, reviewer_decision
-     FROM applications
-     ORDER BY created_at DESC
+    `SELECT a.id, a.created_at, a.risk_tier, a.probability_of_default, a.explanation, a.fraud_flags,
+            a.reviewer_decision, acc.name AS applicant_name, acc.email AS applicant_email
+     FROM applications a
+     LEFT JOIN applicant_accounts acc ON acc.id = a.applicant_id
+     ORDER BY a.created_at DESC
      LIMIT $1 OFFSET $2`,
     [limit, offset]
   );
@@ -90,11 +92,13 @@ export async function listApplications({ limit = 50, offset = 0 } = {}) {
 
 export async function getApplicationById(id) {
   const { rows } = await pool.query(
-    `SELECT id, created_at, features, transaction_narrative, probability_of_default,
-            risk_tier, explanation, top_contributing_features, fraud_flags,
-            reviewer_decision, reviewer_decided_at, reviewer_username
-     FROM applications
-     WHERE id = $1`,
+    `SELECT a.id, a.created_at, a.features, a.transaction_narrative, a.probability_of_default,
+            a.risk_tier, a.explanation, a.top_contributing_features, a.fraud_flags,
+            a.reviewer_decision, a.reviewer_decided_at, a.reviewer_username,
+            acc.name AS applicant_name, acc.email AS applicant_email
+     FROM applications a
+     LEFT JOIN applicant_accounts acc ON acc.id = a.applicant_id
+     WHERE a.id = $1`,
     [id]
   );
   return rows[0] ?? null;

@@ -22,3 +22,57 @@ export const FEATURE_LABELS = {
 export function featureLabel(key) {
   return FEATURE_LABELS[key] ?? key;
 }
+
+export function formatFeatureValue(key, value) {
+  if (value === null || value === undefined) return '—';
+  const num = Number(value);
+
+  switch (key) {
+    case 'MonthlyIncome':
+      return `$${num.toLocaleString()}`;
+    case 'RevolvingUtilizationOfUnsecuredLines':
+      return `${(num * 100).toFixed(1)}%`;
+    case 'DebtRatio':
+      return `${(num * 100).toFixed(1)}%`;
+    case 'utility_payment_streak':
+      return `${num} month${num === 1 ? '' : 's'}`;
+    case 'recharge_regularity_score':
+      return `${num} / 100`;
+    case 'gig_rating':
+      return `${num.toFixed(1)} / 5.0`;
+    case 'gig_trip_volume':
+      return `${num} activities`;
+    case 'age':
+      return `${num} yrs`;
+    case 'income_was_missing':
+    case 'dependents_was_missing':
+      return num === 1 ? 'Estimated' : 'Reported';
+    default:
+      return String(value);
+  }
+}
+
+export const FEATURE_GROUPS = {
+  profile: {
+    title: 'Applicant Demographics',
+    keys: ['age', 'NumberOfDependents'],
+  },
+  alternative: {
+    title: 'Alternative Behavioral Signals (NTC)',
+    keys: ['utility_payment_streak', 'recharge_regularity_score', 'gig_trip_volume', 'gig_rating'],
+  },
+  financial: {
+    title: 'Financial & Bureau Footprint',
+    keys: [
+      'MonthlyIncome',
+      'DebtRatio',
+      'RevolvingUtilizationOfUnsecuredLines',
+      'NumberOfOpenCreditLinesAndLoans',
+      'NumberRealEstateLoansOrLines',
+      'NumberOfTime30-59DaysPastDueNotWorse',
+      'NumberOfTime60-89DaysPastDueNotWorse',
+      'NumberOfTimes90DaysLate',
+    ],
+  },
+};
+

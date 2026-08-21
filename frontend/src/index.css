@@ -486,7 +486,7 @@ textarea.input {
 /* ---------- Print (used for "Download PDF" via window.print) ---------- */
 @page {
   size: A4;
-  margin: 16mm 14mm;
+  margin: 12mm 14mm;
 }
 
 @media print {
@@ -495,24 +495,22 @@ textarea.input {
   }
 
   * {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   html,
   body {
     width: auto;
-    background: #fff;
-    background-image: none;
-    color: #10151f;
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #0f172a !important;
   }
 
-  /* The screen layout is 1280px wide (main.page's max-width); printing
-     that as-is means Chromium's PDF engine either scales the whole layout
-     down to fit the page (clipping the right edge if the scale/margins
-     don't line up exactly) or clips it outright. Forcing the content to
-     the printable page's own width -- not the screen viewport's -- makes
-     it reflow correctly instead of being shrunk. */
+  .app-header {
+    display: none !important;
+  }
+
   .page {
     max-width: 100% !important;
     width: 100% !important;
@@ -520,28 +518,22 @@ textarea.input {
     margin: 0 !important;
   }
 
-  /* Grids (e.g. explanation + submitted-features side-by-side) don't
-     paginate well -- a tall second column strands blank space next to a
-     short first column, or vice versa. Stack to one column so content
-     flows continuously down the page instead. */
   .page > div[style*='grid-template-columns'] {
     display: block !important;
   }
 
   .card {
-    background: #fff;
-    border: 1px solid #d5dbe3;
-    box-shadow: none;
-    backdrop-filter: none;
-    color: #10151f;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    color: #0f172a !important;
     break-inside: avoid;
-    margin-bottom: 16px;
+    margin-bottom: 14px !important;
+    padding: 16px !important;
+    border-radius: 6px !important;
   }
 
-  /* A card taller than one page (e.g. a long submitted-features table)
-     can never satisfy break-inside: avoid -- forcing it anyway strands
-     the entire card on its own page and leaves the page before it mostly
-     blank. Let only genuinely long cards break internally. */
   .card:has(table) {
     break-inside: auto;
   }
@@ -555,18 +547,26 @@ textarea.input {
     width: 100%;
   }
 
-  td {
+  td, th {
     white-space: normal;
     word-break: normal;
     overflow-wrap: normal;
+    color: #0f172a !important;
+  }
+
+  .badge {
+    border: 1px solid currentColor !important;
+    font-weight: 700 !important;
   }
 
   .text-muted,
   .label-caps {
-    color: #4a5568 !important;
+    color: #475569 !important;
   }
 
   a {
     text-decoration: none;
+    color: inherit !important;
   }
 }
+

@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { RiskBadge } from '../components/RiskBadge';
 import { FeatureBar } from '../components/FeatureBar';
-import { featureLabel } from '../lib/featureLabels';
+import { featureLabel, formatFeatureValue, FEATURE_GROUPS } from '../lib/featureLabels';
 import { FRAUD_FLAG_LABELS } from '../lib/fraudFlagLabels';
 import { useAuth } from '../context/AuthContext';
 import { getApplication, decideApplication } from '../api/client';
@@ -43,8 +43,8 @@ function ReviewerDecisionPanel({ application, token, onDecided }) {
     <div className="card" data-print-hide style={{ marginBottom: 'var(--space-lg)' }}>
       <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>This application needs a decision</h2>
       <p className="text-muted" style={{ fontSize: 14, marginTop: 0, marginBottom: 'var(--space-md)' }}>
-        The model couldn't confidently approve or reject this application. Review the explanation
-        and factors below, then record a decision.
+        The model couldn't confidently approve or reject this application. Review the applicant profile,
+        explanation, and factors below, then record a decision.
       </p>
       {error && <p className="field-error" style={{ marginBottom: 'var(--space-md)' }}>{error}</p>}
       <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
@@ -110,23 +110,52 @@ export function ApplicationDetail() {
 
         {application && (
           <>
-            <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
-              <div>
-                <p className="mono text-muted" style={{ margin: 0, fontSize: 13, marginBottom: 4 }}>{application.id}</p>
-                <RiskBadge tier={application.risk_tier} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-                <p className="mono" style={{ margin: 0, fontSize: 15 }}>
-                  {(application.probability_of_default * 100).toFixed(1)}% estimated risk
-                </p>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  data-print-hide
-                  onClick={() => window.print()}
-                >
-                  ↓ Download PDF
-                </button>
+            {/* Applicant Profile Header */}
+            <div className="card" style={{ marginBottom: 'var(--space-lg)', position: 'relative' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
+                <div>
+                  <span className="label-caps" style={{ color: 'var(--color-accent)', fontWeight: 700 }}>Applicant Dossier</span>
+                  <h1 style={{ fontSize: 24, fontWeight: 700, margin: '4px 0 8px 0' }}>
+                    {application.applicant_name || 'Anonymous Applicant'}
+                  </h1>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-lg)', fontSize: 14 }}>
+                    <div>
+                      <span className="text-muted">Email: </span>
+                      <strong className="mono">{application.applicant_email || 'No email attached'}</strong>
+                    </div>
+                    <div>
+                      <span className="text-muted">Application ID: </span>
+                      <span className="mono text-muted">{application.id}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted">Submitted: </span>
+                      <span>
+                        {new Date(application.created_at).toLocaleString(undefined, {
+                          dateStyle: 'medium',
+                          timeStyle: 'short',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--space-sm)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                    <RiskBadge tier={application.risk_tier} />
+                    <span className="mono" style={{ fontSize: 16, fontWeight: 700 }}>
+                      {(application.probability_of_default * 100).toFixed(1)}% risk
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-print-hide
+                    onClick={() => window.print()}
+                    style={{ padding: '6px 14px', fontSize: 13 }}
+                  >
+                    ↓ Download PDF Report
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -149,43 +178,105 @@ export function ApplicationDetail() {
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
-              <div className="card">
-                <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 'var(--space-md)' }}>Explanation</h2>
-                <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)' }}>
-                  {application.explanation}
-                </p>
-                <h3 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>Top contributing factors</h3>
-                {application.top_contributing_features.map((f) => (
-                  <FeatureBar
-                    key={f.feature}
-                    feature={f.feature}
-                    shapValue={f.shap_value}
-                    maxAbsValue={Math.max(...application.top_contributing_features.map((x) => Math.abs(x.shap_value)), 0.001)}
-                  />
-                ))}
+            {/* Main Content Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
+              {/* Left Column: AI & SHAP Explainability */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+                <div className="card">
+                  <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 'var(--space-md)' }}>AI Underwriting Explanation</h2>
+                  <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)', fontSize: 14 }}>
+                    {application.explanation}
+                  </p>
+                  <h3 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>Top contributing factors (SHAP)</h3>
+                  {application.top_contributing_features.map((f) => (
+                    <FeatureBar
+                      key={f.feature}
+                      feature={f.feature}
+                      shapValue={f.shap_value}
+                      maxAbsValue={Math.max(...application.top_contributing_features.map((x) => Math.abs(x.shap_value)), 0.001)}
+                    />
+                  ))}
+                </div>
+
+                {application.transaction_narrative && (
+                  <div className="card">
+                    <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Applicant Income Narrative</h2>
+                    <p className="text-muted" style={{ fontSize: 12, marginTop: 0, marginBottom: 'var(--space-sm)' }}>
+                      Sensitive terms (gender, religion, caste, disability, marital status) stripped by bias guardrail.
+                    </p>
+                    <div style={{ padding: 'var(--space-md)', background: 'var(--color-surface-container-low)', borderRadius: 'var(--radius-md)', fontSize: 13, lineHeight: 1.6 }}>
+                      {application.transaction_narrative}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="card">
-                <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 'var(--space-md)' }}>Submitted features</h2>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <tbody>
-                    {Object.entries(application.features).map(([key, value]) => (
-                      <tr key={key} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
-                        <td style={{ padding: '6px 0', color: 'var(--color-on-surface-variant)' }}>{featureLabel(key)}</td>
-                        <td style={{ padding: '6px 0', textAlign: 'right' }} className="mono">{String(value)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {application.transaction_narrative && (
-                  <>
-                    <h3 className="label-caps" style={{ marginTop: 'var(--space-lg)', marginBottom: 'var(--space-sm)' }}>
-                      Narrative (guardrail-applied)
-                    </h3>
-                    <p style={{ fontSize: 13, color: 'var(--color-on-surface-variant)' }}>{application.transaction_narrative}</p>
-                  </>
-                )}
+              {/* Right Column: Structured Applicant Profile & Alternative Signals */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+                {/* Alternative Behavioral Signals */}
+                <div className="card" style={{ borderColor: 'var(--color-accent-soft)', background: 'var(--color-surface)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-sm)' }}>
+                    <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Alternative Behavioral Data</h2>
+                    <span className="badge badge-approve" style={{ fontSize: 11 }}>NTC Differentiator</span>
+                  </div>
+                  <p className="text-muted" style={{ fontSize: 12, marginTop: 0, marginBottom: 'var(--space-md)' }}>
+                    Signals captured from recurring payments and platform activity.
+                  </p>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <tbody>
+                      {FEATURE_GROUPS.alternative.keys.map((key) => (
+                        <tr key={key} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                          <td style={{ padding: '8px 0', color: 'var(--color-on-surface-variant)' }}>{featureLabel(key)}</td>
+                          <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 600 }} className="mono">
+                            {formatFeatureValue(key, application.features[key])}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Traditional Financial & Bureau Footprint */}
+                <div className="card">
+                  <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 'var(--space-sm)' }}>Financial & Bureau Factors</h2>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <tbody>
+                      {FEATURE_GROUPS.financial.keys.map((key) => {
+                        const val = application.features[key];
+                        if (val === undefined) return null;
+                        return (
+                          <tr key={key} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                            <td style={{ padding: '6px 0', color: 'var(--color-on-surface-variant)' }}>{featureLabel(key)}</td>
+                            <td style={{ padding: '6px 0', textAlign: 'right' }} className="mono">
+                              {formatFeatureValue(key, val)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Demographics */}
+                <div className="card">
+                  <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 'var(--space-sm)' }}>Demographics & Household</h2>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <tbody>
+                      {FEATURE_GROUPS.profile.keys.map((key) => {
+                        const val = application.features[key];
+                        if (val === undefined) return null;
+                        return (
+                          <tr key={key} style={{ borderBottom: '1px solid var(--color-outline-variant)' }}>
+                            <td style={{ padding: '6px 0', color: 'var(--color-on-surface-variant)' }}>{featureLabel(key)}</td>
+                            <td style={{ padding: '6px 0', textAlign: 'right' }} className="mono">
+                              {formatFeatureValue(key, val)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </>
@@ -194,3 +285,4 @@ export function ApplicationDetail() {
     </>
   );
 }
+
