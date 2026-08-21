@@ -98,7 +98,7 @@ const MIN_AGE = 18;
 const MAX_AGE = 110;
 
 export function ApplicationForm() {
-  const { isVerified, token, applicant: account } = useApplicantAuth();
+  const { isVerified, token, applicant: account, signIn } = useApplicantAuth();
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -136,13 +136,24 @@ export function ApplicationForm() {
     setSubmitting(true);
     try {
       const applicant = toApplicantPayload(form);
+      const submittedName = needsName ? form.name.trim() : (account?.name || '');
       const result = await submitApplication({
         applicant,
         transactionNarrative: form.narrative || undefined,
         applicantName: needsName ? form.name.trim() : undefined,
         token,
       });
-      navigate('/results', { state: { result, applicant } });
+      if (needsName && form.name.trim()) {
+        signIn(token, { ...account, name: form.name.trim() });
+      }
+      navigate('/results', {
+        state: {
+          result,
+          applicant,
+          applicantInfo: { name: submittedName, email: account?.email },
+          narrative: form.narrative || undefined,
+        },
+      });
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {

@@ -50,3 +50,20 @@ nextlevelbuilder-ui-ux-pro-max-skill-Public-main/
 # Raw Stitch design export (reference input for Phase 6 -- not a deliverable;
 # real frontend code lives in frontend/)
 stitch_aperture_credit_underwriting_tool/
+
+# Hackathon submission package (deck, demo recording, zip) -- large binary
+# deliverables sent directly to Synchrony, not part of the source repo
+submission/
+/*.pptx
+/*.zip
+/*.pdf
+
+# Ad-hoc screenshots and design references dropped in the repo root during
+# work, not project deliverables
+Screenshot*.png
+
+# Internal working notes, not a deliverable
+PLAN.md
+CHANGELOG.md
+docs/frontend-brief.md
+docs/stitch-prompt.md

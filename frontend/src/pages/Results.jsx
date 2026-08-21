@@ -176,7 +176,7 @@ function CounterfactualExplorer({ applicant }) {
 }
 
 function PastApplicationView({ id }) {
-  const { token, isVerified, email } = useApplicantAuth();
+  const { token, isVerified, applicant: account } = useApplicantAuth();
   const [application, setApplication] = useState(null);
   const [error, setError] = useState(null);
 
@@ -216,7 +216,9 @@ function PastApplicationView({ id }) {
   }
 
   const tierInfo = TIER_COPY[application.risk_tier] ?? TIER_COPY['Manual Review'];
-  const maxAbsValue = Math.max(...application.top_contributing_features.map((f) => Math.abs(f.shap_value)), 0.001);
+  const maxAbsValue = Math.max(...(application.top_contributing_features ?? []).map((f) => Math.abs(f.shap_value)), 0.001);
+  const applicantDisplayName = account?.name || 'Applicant';
+  const applicantDisplayEmail = account?.email || '';
 
   return (
     <>
@@ -226,36 +228,65 @@ function PastApplicationView({ id }) {
           ← Back to your applications
         </Link>
 
-        {/* Header summary banner */}
-        <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-            <span style={{ fontSize: 28 }} aria-hidden="true">{tierInfo.icon}</span>
+        {/* Applicant Profile Header Dossier */}
+        <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 4 }}>
-                <RiskBadge tier={application.risk_tier} />
-                <span className="mono text-muted" style={{ fontSize: 12 }}>ID: {application.id?.slice(0, 8)}…</span>
+              <span className="label-caps" style={{ color: 'var(--color-accent)', fontWeight: 700 }}>Underwriting Decision Report</span>
+              <h1 style={{ fontSize: 24, fontWeight: 700, margin: '4px 0 8px 0' }}>
+                {applicantDisplayName}
+              </h1>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-lg)', fontSize: 14 }}>
+                {applicantDisplayEmail && (
+                  <div>
+                    <span className="text-muted">Email: </span>
+                    <strong className="mono">{applicantDisplayEmail}</strong>
+                  </div>
+                )}
+                <div>
+                  <span className="text-muted">Application ID: </span>
+                  <span className="mono text-muted">{application.id}</span>
+                </div>
+                <div>
+                  <span className="text-muted">Assessment Date: </span>
+                  <span>
+                    {new Date(application.created_at).toLocaleString(undefined, {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    })}
+                  </span>
+                </div>
               </div>
-              <p className="text-muted mono" style={{ margin: 0, fontSize: 14 }}>
-                Estimated risk: {(application.probability_of_default * 100).toFixed(1)}% {email && `• Account: ${email}`}
-              </p>
             </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-            <p className="text-muted" style={{ margin: 0, maxWidth: 300, fontSize: 14 }}>{tierInfo.message}</p>
-            <button type="button" className="btn btn-secondary" data-print-hide onClick={() => window.print()}>
-              ↓ Download PDF
-            </button>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--space-sm)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                <RiskBadge tier={application.risk_tier} />
+                <span className="mono" style={{ fontSize: 16, fontWeight: 700 }}>
+                  {(application.probability_of_default * 100).toFixed(1)}% estimated risk
+                </span>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-print-hide
+                onClick={() => window.print()}
+                style={{ padding: '6px 14px', fontSize: 13 }}
+              >
+                ↓ Download PDF Report
+              </button>
+            </div>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
           <div className="card">
             <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 'var(--space-md)' }}>Why this decision</h2>
-            <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)' }}>
+            <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)', fontSize: 14 }}>
               {application.explanation}
             </p>
             <h3 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>Top contributing factors (SHAP)</h3>
-            {application.top_contributing_features.map((f) => (
+            {(application.top_contributing_features ?? []).map((f) => (
               <FeatureBar key={f.feature} feature={f.feature} shapValue={f.shap_value} maxAbsValue={maxAbsValue} />
             ))}
           </div>
@@ -272,7 +303,8 @@ function PastApplicationView({ id }) {
 export function Results() {
   const location = useLocation();
   const { id } = useParams();
-  const { result, applicant } = location.state ?? {};
+  const { result, applicant, applicantInfo, narrative } = location.state ?? {};
+  const { applicant: authApplicant } = useApplicantAuth();
 
   if (id) {
     return <PastApplicationView id={id} />;
@@ -282,45 +314,78 @@ export function Results() {
     return <Navigate to="/apply" replace />;
   }
 
+  const currentApplicantName = applicantInfo?.name || authApplicant?.name || 'Applicant';
+  const currentApplicantEmail = applicantInfo?.email || authApplicant?.email || '';
+
   const tierInfo = TIER_COPY[result.riskTier] ?? TIER_COPY['Manual Review'];
-  const maxAbsValue = Math.max(...result.topContributingFeatures.map((f) => Math.abs(f.shap_value)), 0.001);
+  const maxAbsValue = Math.max(...(result.topContributingFeatures ?? []).map((f) => Math.abs(f.shap_value)), 0.001);
 
   return (
     <>
       <Header />
       <main className="page" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-        <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-            <span style={{ fontSize: 28 }} aria-hidden="true">{tierInfo.icon}</span>
+        {/* Applicant Profile Header Dossier */}
+        <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
-                <RiskBadge tier={result.riskTier} />
+              <span className="label-caps" style={{ color: 'var(--color-accent)', fontWeight: 700 }}>Underwriting Decision Report</span>
+              <h1 style={{ fontSize: 24, fontWeight: 700, margin: '4px 0 8px 0' }}>
+                {currentApplicantName}
               </h1>
-              <p className="text-muted mono" style={{ margin: 0, fontSize: 14 }}>
-                Estimated risk: {(result.probabilityOfDefault * 100).toFixed(1)}%
-              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-lg)', fontSize: 14 }}>
+                {currentApplicantEmail && (
+                  <div>
+                    <span className="text-muted">Email: </span>
+                    <strong className="mono">{currentApplicantEmail}</strong>
+                  </div>
+                )}
+                {result.id && (
+                  <div>
+                    <span className="text-muted">Application ID: </span>
+                    <span className="mono text-muted">{result.id}</span>
+                  </div>
+                )}
+                <div>
+                  <span className="text-muted">Assessment Date: </span>
+                  <span>
+                    {new Date(result.createdAt || Date.now()).toLocaleString(undefined, {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--space-sm)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                <RiskBadge tier={result.riskTier} />
+                <span className="mono" style={{ fontSize: 16, fontWeight: 700 }}>
+                  {(result.probabilityOfDefault * 100).toFixed(1)}% estimated risk
+                </span>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-print-hide
+                onClick={() => window.print()}
+                style={{ padding: '6px 14px', fontSize: 13 }}
+              >
+                ↓ Download PDF Report
+              </button>
             </div>
           </div>
-          <p className="text-muted" style={{ margin: 0, maxWidth: 320, fontSize: 14 }}>{tierInfo.message}</p>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            data-print-hide
-            onClick={() => window.print()}
-          >
-            ↓ Download PDF Report
-          </button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)', gap: 'var(--space-lg)' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', minWidth: 0 }}>
             <div className="card">
               <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 'var(--space-md)' }}>Why this decision</h2>
-              <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)' }}>
+              <p style={{ color: 'var(--color-on-surface-variant)', lineHeight: 1.6, marginBottom: 'var(--space-lg)', fontSize: 14 }}>
                 {result.explanation}
               </p>
               <h3 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>Top contributing factors</h3>
-              {result.topContributingFeatures.map((f) => (
+              {(result.topContributingFeatures ?? []).map((f) => (
                 <FeatureBar key={f.feature} feature={f.feature} shapValue={f.shap_value} maxAbsValue={maxAbsValue} />
               ))}
             </div>
@@ -330,7 +395,7 @@ export function Results() {
             </div>
 
             {/* Profile and Submitted Features Summary */}
-            <ProfileFeatureSummary features={applicant} />
+            <ProfileFeatureSummary features={applicant} narrative={narrative} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', minWidth: 0 }}>

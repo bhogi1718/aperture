@@ -188,12 +188,12 @@ export function ApplicationDetail() {
                     {application.explanation}
                   </p>
                   <h3 className="label-caps" style={{ marginBottom: 'var(--space-md)' }}>Top contributing factors (SHAP)</h3>
-                  {application.top_contributing_features.map((f) => (
+                  {(application.top_contributing_features ?? []).map((f) => (
                     <FeatureBar
                       key={f.feature}
                       feature={f.feature}
                       shapValue={f.shap_value}
-                      maxAbsValue={Math.max(...application.top_contributing_features.map((x) => Math.abs(x.shap_value)), 0.001)}
+                      maxAbsValue={Math.max(...(application.top_contributing_features ?? []).map((x) => Math.abs(x.shap_value)), 0.001)}
                     />
                   ))}
                 </div>
