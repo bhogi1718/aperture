@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { pool } from "./pool.js";
 
 const OTP_EXPIRY_MINUTES = 5;
@@ -50,7 +51,10 @@ export async function verifyOtpCode(email, code) {
 
   await pool.query(`UPDATE otp_codes SET attempts = attempts + 1 WHERE id = $1`, [otp.id]);
 
-  if (otp.code !== code) return "incorrect";
+  const codesMatch =
+    otp.code.length === code.length &&
+    crypto.timingSafeEqual(Buffer.from(otp.code), Buffer.from(code));
+  if (!codesMatch) return "incorrect";
 
   await pool.query(`UPDATE otp_codes SET verified_at = now() WHERE id = $1`, [otp.id]);
   return "ok";
@@ -61,9 +65,17 @@ export async function findApplicantByEmail(email) {
   return rows[0] ?? null;
 }
 
+/**
+ * Inserts a new applicant account, or returns the existing row if a
+ * concurrent request for the same email already created one (email is
+ * UNIQUE) -- avoids a unique-violation error on two near-simultaneous
+ * verify-otp calls for a brand-new email.
+ */
 export async function createApplicantAccount(email, name) {
   const { rows } = await pool.query(
-    `INSERT INTO applicant_accounts (email, name) VALUES ($1, $2) RETURNING id, email, name, created_at`,
+    `INSERT INTO applicant_accounts (email, name) VALUES ($1, $2)
+     ON CONFLICT (email) DO UPDATE SET last_login_at = now()
+     RETURNING id, email, name, created_at`,
     [email, name]
   );
   return rows[0];

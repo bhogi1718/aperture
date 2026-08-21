@@ -22,7 +22,7 @@ export const env = {
 
   // OTP / applicant identity
   emailOtpProvider: process.env.EMAIL_OTP_PROVIDER ?? "mock",
-  applicantJwtSecret: process.env.APPLICANT_JWT_SECRET ?? process.env.JWT_SECRET ?? "",
+  applicantJwtSecret: required("APPLICANT_JWT_SECRET"),
   nodeEnv: process.env.NODE_ENV ?? "development",
 
   // Only required when EMAIL_OTP_PROVIDER=smtp

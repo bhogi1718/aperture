@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import rateLimit from "express-rate-limit";
 import { env } from "../config/env.js";
 import { getEmailOtpProvider } from "../services/emailOtp/index.js";
 import {
@@ -22,7 +23,19 @@ export const requestOtpSchema = z.object({
   name: z.string().trim().min(1).max(100),
 });
 
-applicantAuthRouter.post("/request-otp", async (req, res) => {
+// Per-email cooldown (canRequestOtp) stops rapid resends to one address, but
+// says nothing about one IP hitting many addresses -- this caps requests per
+// IP so a single client can't use the endpoint to flood arbitrary inboxes or
+// run up the SMTP account's send volume.
+const requestOtpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many verification requests from this device. Try again later." },
+});
+
+applicantAuthRouter.post("/request-otp", requestOtpLimiter, async (req, res) => {
   const parsed = requestOtpSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
