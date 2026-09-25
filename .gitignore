@@ -44,7 +44,7 @@ postgres-data/
 # Third-party tooling dropped into the repo root, not part of Aperture
 nextlevelbuilder-ui-ux-pro-max-skill-Public-main/
 
-# Claude Code local state
+# Local editor/assistant state
 .claude/
 
 # Raw Stitch design export (reference input for Phase 6 -- not a deliverable;
